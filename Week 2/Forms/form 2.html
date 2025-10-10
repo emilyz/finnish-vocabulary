@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Testimonial</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide icons for the upload icon -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles to enhance the aesthetic */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3ff86; /* Lighter background for a clean look */
+        }
+        /* Custom focus for select inputs */
+        select:focus {
+            --tw-ring-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Form Container: Increased max-width for the dense form -->
+    <div class="w-full max-w-4xl bg-white p-8 md:p-12 rounded-xl shadow-2xl">
+        
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-8">Add Testimonial</h1>
+
+        <form id="testimonyForm" action="#" method="POST" onsubmit="handleFormSubmit(event)">
+            
+            <!-- Two Column Layout for Basic Info -->
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <!-- First Name Input -->
+                <div>
+                    <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                    <input type="text" id="firstName" name="firstName" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm"
+                    >
+                </div>
+
+                <!-- Last Name Input -->
+                <div>
+                    <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                    <input type="text" id="lastName" name="lastName" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm"
+                    >
+                </div>
+            </div>
+
+            <!-- Two Column Layout for Gender & Country -->
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <!-- Gender Select -->
+                <div>
+                    <label for="gender" class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                    <select id="gender" name="gender" required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm appearance-none bg-white pr-8"
+                    >
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="preferNotToSay">Prefer not to say</option>
+                    </select>
+                </div>
+
+                <!-- Country Select -->
+                <div>
+                    <label for="country" class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                    <select id="country" name="country" required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm appearance-none bg-white pr-8"
+                    >
+                        <option value="">Select Country</option>
+                        <option value="usa">USA</option>
+                        <option value="can">Canada</option>
+                        <option value="uk">UK</option>
+                        <!-- ... More countries ... -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Two Column Layout for Profession & Company -->
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <!-- Profession Input -->
+                <div>
+                    <label for="profession" class="block text-sm font-medium text-gray-700 mb-2">Profession</label>
+                    <input type="text" id="profession" name="profession" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm"
+                    >
+                </div>
+
+                <!-- Company Input -->
+                <div>
+                    <label for="company" class="block text-sm font-medium text-gray-700 mb-2">Company</label>
+                    <input type="text" id="company" name="company" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm"
+                    >
+                </div>
+            </div>
+            
+            <!-- Two Column Layout for Program & Start Date -->
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <!-- Program Select -->
+                <div>
+                    <label for="program" class="block text-sm font-medium text-gray-700 mb-2">Program * Select program</label>
+                    <select id="program" name="program" required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm appearance-none bg-white pr-8"
+                    >
+                        <option value="">Select program</option>
+                        <option value="js30">30 Days of JavaScript</option>
+                        <option value="py30">30 Days of Python</option>
+                        <option value="react30">30 Days of React</option>
+                    </select>
+                </div>
+
+                <!-- Program Start Date Input -->
+                <div>
+                    <label for="programStartDate" class="block text-sm font-medium text-gray-700 mb-2">Program Start Date</label>
+                    <input type="date" id="programStartDate" name="programStartDate" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm"
+                    >
+                </div>
+            </div>
+
+            <!-- Other Courses Input -->
+            <div class="mb-6">
+                <label for="otherCourses" class="block text-sm font-medium text-gray-700 mb-2">Other Courses</label>
+                <input type="text" id="otherCourses" name="otherCourses" placeholder="Programs or courses separated by comma (e.g HTML, CSS, JS, React, Python)"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm"
+                >
+            </div>
+
+            <!-- Testimony Textarea -->
+            <div class="mb-8">
+                <label for="testimonyText" class="block text-sm font-medium text-gray-700 mb-2">Your Testimonial</label>
+                <textarea id="testimonyText" name="testimonyText" rows="6" placeholder="What did you expect and how did the program help you in your career..." required 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm resize-y"
+                ></textarea>
+            </div>
+
+            <!-- Two Column Layout for Profiles -->
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <!-- GitHub Profile Input -->
+                <div>
+                    <label for="githubProfile" class="block text-sm font-medium text-gray-700 mb-2">GitHub Profile</label>
+                    <input type="url" id="githubProfile" name="githubProfile" placeholder="https://github.com/username"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm"
+                    >
+                </div>
+
+                <!-- LinkedIn Profile Input -->
+                <div>
+                    <label for="linkedinProfile" class="block text-sm font-medium text-gray-700 mb-2">LinkedIn Profile</label>
+                    <input type="url" id="linkedinProfile" name="linkedinProfile" placeholder="https://linkedin.com/in/username"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm"
+                    >
+                </div>
+            </div>
+
+            <!-- Two Column Layout for Rating & Mentoring -->
+            <div class="grid md:grid-cols-2 gap-6 mb-8 items-end">
+                <!-- Rating Input -->
+                <div>
+                    <label for="rating" class="block text-sm font-medium text-gray-700 mb-2">Rating (1-5)</label>
+                    <input type="number" id="rating" name="rating" min="1" max="5" placeholder="" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 shadow-sm"
+                    >
+                </div>
+
+                <!-- Mentoring Checkbox -->
+                <div class="flex items-center h-full">
+                    <input id="mentoring" name="mentoring" type="checkbox" 
+                           class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    >
+                    <label for="mentoring" class="ml-2 block text-base font-medium text-gray-700">Have you been mentoring others?</label>
+                </div>
+            </div>
+
+            <!-- Profile Picture Upload Area -->
+            <div class="mb-8">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
+                <div id="uploadArea" class="mt-1 flex justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition duration-150"
+                     onclick="document.getElementById('profilePicture').click()"
+                     ondragover="event.preventDefault(); this.classList.add('border-blue-600', 'bg-blue-50');"
+                     ondragleave="this.classList.remove('border-blue-600', 'bg-blue-50');"
+                     ondrop="handleFileDrop(event); this.classList.remove('border-blue-600', 'bg-blue-50');"
+                >
+                    <div class="space-y-1 text-center">
+                        <!-- Upload Icon from Lucide -->
+                        <i data-lucide="upload-cloud" class="w-12 h-12 text-gray-400 mx-auto"></i>
+                        <div class="flex text-sm text-gray-600">
+                            <span class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                Click to upload
+                            </span>
+                            <p class="pl-1">or drag and drop</p>
+                        </div>
+                        <p class="text-xs text-gray-500">PNG, JPG or GIF</p>
+                    </div>
+                </div>
+                <input id="profilePicture" name="profilePicture" type="file" accept="image/png, image/jpeg, image/gif" class="sr-only">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" 
+                class="w-full py-3 px-4 bg-blue-700 hover:bg-blue-800 text-white text-lg font-semibold rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-[1.01] focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50"
+            >
+                Submit Testimonial
+            </button>
+            
+            <!-- Message Box (Instead of alert()) -->
+            <div id="messageBox" class="mt-6 hidden p-4 text-base font-medium text-green-700 bg-green-100 rounded-lg shadow-md" role="alert">
+                <!-- Message will appear here -->
+            </div>
+            
+        </form>
+    </div>
+
+    <!-- JavaScript for Icon Replacement and Submission Handling -->
+    <script>
+        // Replace Lucide icon tags with actual SVG icons
+        lucide.createIcons();
+
+        // Function to display messages instead of using alert()
+        function displayMessage(message, isError = false) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            
+            // Set styles based on success or error
+            if (isError) {
+                messageBox.classList.remove('bg-green-100', 'text-green-700');
+                messageBox.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                messageBox.classList.remove('bg-red-100', 'text-red-700');
+                messageBox.classList.add('bg-green-100', 'text-green-700');
+            }
+
+            messageBox.classList.remove('hidden');
+            // Hide after 5 seconds
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 5000); 
+        }
+
+        // Handle file drop event for the upload area
+        function handleFileDrop(event) {
+            event.preventDefault();
+            const files = event.dataTransfer.files;
+            if (files.length) {
+                // Set the file to the hidden input
+                document.getElementById('profilePicture').files = files;
+                console.log('File dropped:', files[0].name);
+                displayMessage(`File selected: ${files[0].name}`, false);
+            }
+        }
+
+        // Handle form submission
+        function handleFormSubmit(event) {
+            // Prevent the default form submission (which reloads the page)
+            event.preventDefault(); 
+            
+            // Collect form data (only logging for demonstration purposes)
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                gender: document.getElementById('gender').value,
+                country: document.getElementById('country').value,
+                profession: document.getElementById('profession').value,
+                company: document.getElementById('company').value,
+                program: document.getElementById('program').value,
+                programStartDate: document.getElementById('programStartDate').value,
+                otherCourses: document.getElementById('otherCourses').value,
+                testimonyText: document.getElementById('testimonyText').value,
+                githubProfile: document.getElementById('githubProfile').value,
+                linkedinProfile: document.getElementById('linkedinProfile').value,
+                rating: document.getElementById('rating').value,
+                mentoring: document.getElementById('mentoring').checked,
+                profilePicture: document.getElementById('profilePicture').files[0] ? document.getElementById('profilePicture').files[0].name : 'No file selected',
+            };
+
+            console.log("Full Form Data Submitted:", formData);
+
+            // Simulate a successful submission
+            displayMessage('Thank you! Your testimonial has been successfully submitted for review.');
+
+            // Clear the form fields
+            document.getElementById('testimonyForm').reset();
+            
+            // Reset the file input visually/programmatically
+            document.getElementById('profilePicture').value = '';
+        }
+    </script>
+</body>
+</html>

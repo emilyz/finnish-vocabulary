@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parrot Panic! - Help Polly the Parrot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 3em;
+            color: #FF6B35;
+            text-shadow: 3px 3px 0px #FFE66D;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            color: #2E8B57;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #ddd;
+            border-radius: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+            border: 3px solid #333;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B35, #FFE66D);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .quest-info {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 3px solid #333;
+            text-align: center;
+        }
+
+        .character {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 20px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .character:hover {
+            transform: scale(1.1);
+        }
+
+        .polly {
+            background: linear-gradient(45deg, #32CD32, #FFD700, #FF6347);
+            border: 4px solid #333;
+        }
+
+        .rex {
+            background: linear-gradient(45deg, #8B4513, #DEB887);
+            border: 4px solid #333;
+        }
+
+        .game-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            border: 4px solid #333;
+            min-height: 100px;
+        }
+
+        .room-scene {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 20px;
+            height: 3%;
+            margin-bottom: 30px;
+        }
+
+        .room-item {
+            background: #f0f0f0;
+            border: 3px solid #ccc;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .room-item .emoji {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+
+        .room-item .label {
+            font-size: 0.3em;
+            font-weight: bold;
+            color: #666;
+            text-align: center;
+            line-height: 1.2;
+            display: none;
+
+        }
+
+        .room-item:hover {
+            transform: scale(1.05);
+            border-color: #FF6B35;
+            background: #fff5f5;
+        }
+
+        .room-item.found {
+            background: linear-gradient(135deg, #98FB98, #90EE90);
+            border-color: #32CD32;
+            color: #006400;
+        }
+
+        .room-item.current {
+            background: linear-gradient(135deg, #FFE66D, #FFA500);
+            border-color: #FF6B35;
+            
+        
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid #333;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF6B35, #FF8C42);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #87CEEB, #4682B4);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #32CD32, #228B22);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.3em;
+            font-weight: bold;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feedback.success {
+            color: #32CD32;
+        }
+
+        .feedback.error {
+            color: #FF4444;
+        }
+
+        .phase-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .phase {
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 3px solid #ccc;
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .phase.active {
+            background: linear-gradient(135deg, #FFE66D, #FFA500);
+            border-color: #FF6B35;
+            color: #333;
+        }
+
+        .phase.completed {
+            background: linear-gradient(135deg, #98FB98, #90EE90);
+            border-color: #32CD32;
+            color: #006400;
+        }
+
+        .word-display {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .current-word {
+            font-size: 2.5em;
+            color: #FF6B35;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .word-translation {
+            font-size: 1.5em;
+            color: #666;
+            font-style: italic;
+        }
+
+        .speech-area {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .mic-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B35, #FF8C42);
+            border: 4px solid #333;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+        }
+
+        .mic-button:hover {
+            transform: scale(1.1);
+        }
+
+        .mic-button.listening {
+            animation: listening 1s infinite;
+            background: linear-gradient(135deg, #32CD32, #228B22);
+        }
+
+        @keyframes listening {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .spelling-area {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .letter-slots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .letter-slot {
+            width: 50px;
+            height: 60px;
+            border: 3px solid #333;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            background: white;
+        }
+
+        .letter-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .letter-option {
+            width: 40px;
+            height: 50px;
+            border: 3px solid #333;
+            border-radius: 8px;
+            background: #FFE66D;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .letter-option:hover {
+            background: #FFA500;
+            transform: translateY(-2px);
+        }
+
+        .letter-option.used {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .celebration {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #FFE66D, #98FB98);
+            border-radius: 20px;
+            margin: 30px 0;
+            border: 4px solid #333;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 3px solid #333;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #FF6B35;
+        }
+
+        .stat-label {
+            font-size: 1em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .room-scene {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(4, 1fr);
+            }
+            
+            .title {
+                font-size: 2em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .phase-indicator {
+                flex-direction: column;
+                align-items: center;
+            }
+        figure figcaption {display: none;}
+        .card .label, 
+        .caption, 
+        .title 
+        {
+            display: none ! important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title">Parrot Panic!</h1>
+            <p class="tagline">Help Polly the Parrot rebuild her house!</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="quest-info">
+            <h2>Quest 1: Le Salon (The Living Room)</h2>
+            <div style="margin: 20px 0;">
+                <div class="character polly" onclick="playPollySound()" title="Polly le Perroquet"> <img src= "style.css/images/myParrot.png"myParrot.png" alt "Polly the parrot" style = "width:80px; height: auto;" 
+                /div>
+                <div class="character rex" onclick="playRexSound()" title="Rex le Chien">🐕</div>
+            </div>
+            <p><strong>Mission:</strong> Help Polly find 20 objects hidden by Rex in the living room!</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="wordsLearned">0</div>
+                <div class="stat-label">Words Learned</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="feathers">0</div>
+                <div class="stat-label">Feathers 🪶</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="accuracy">100</div>
+                <div class="stat-label">Accuracy %</div>
+            </div>
+        </div>
+
+        <div class="phase-indicator">
+            <div class="phase active" id="phaseA">Phase A: Listen</div>
+            <div class="phase" id="phaseB">Phase B: Speak</div>
+            <div class="phase" id="phaseC">Phase C: Write</div>
+        </div>
+
+        <div class="game-area">
+            <!-- Phase A: Listen & Identify -->
+            <div id="phaseAContent">
+                <h3>Phase A: Listen and find the object!</h3>
+                <div class="word-display">
+                    <div class="current-word" id="currentWordFrench">le canapé</div>
+                    <button class="hint-button" onclick="showHint('currentWordEnglish')">💡 Hint</button>
+                    <div class="hint-translation hidden" id="currentWordEnglish">(the sofa)</div>
+                </div>
+                <div class="room-scene" id="roomScene"></div>
+                <div class="feedback" id="feedbackA"></div>
+            </div>
+
+            <!-- Phase B: Speak -->
+            <div id="phaseBContent" class="hidden">
+                <h3>Phase B: Repeat the word!</h3>
+                <div class="word-display">
+                    <div class="current-word" id="currentWordB">le canapé</div>
+                    <button class="hint-button" onclick="showHint('currentWordBEnglish')">💡 Hint</button>
+                    <div class="hint-translation hidden" id="currentWordBEnglish">(the sofa)</div>
+                </div>
+                <div class="speech-area">
+                    <p>Click the microphone and repeat the word:</p>
+                    <button class="mic-button" id="micButton" onclick="startListening()">🎤</button>
+                    <p id="speechStatus">Ready to listen</p>
+                </div>
+                <div class="feedback" id="feedbackB"></div>
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="skipSpeech()">Skip (for demo)</button>
+                </div>
+            </div>
+
+            <!-- Phase C: Write -->
+            <div id="phaseCContent" class="hidden">
+                <h3>Phase C: Spell the word!</h3>
+                <div class="word-display">
+                    <div class="current-word" id="currentWordC">_ _   _ _ _ _ _ _</div>
+                    <button class="hint-button" onclick="showHint('currentWordCEnglish')">💡 Hint</button>
+                    <div class="hint-translation hidden" id="currentWordCEnglish">(the sofa)</div>
+                </div>
+                <div class="spelling-area">
+                    <div class="letter-slots" id="letterSlots"></div>
+                    <div class="letter-options" id="letterOptions"></div>
+                </div>
+                <div class="feedback" id="feedbackC"></div>
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="clearSpelling()">Clear</button>
+                </div>
+            </div>
+
+            <!-- Completion -->
+            <div id="completionContent" class="hidden">
+                <div class="celebration">
+                    <h2>🎉 Congratulations! Quest Complete! 🎉</h2>
+                    <p>You helped Polly find all the objects in the living room!</p>
+                    <div style="margin: 20px 0; font-size: 1.5em;">
+                        🏆 Badge earned: "Living Room Master" 🏆
+                    </div>
+                    <button class="btn btn-success" onclick="restartGame()">Play Again</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="nextButton" onclick="nextPhase()" disabled>Next</button>
+            <button class="btn btn-secondary" onclick="showInstructions()">Instructions</button>
+        </div>
+    </div>
+
+    <script>
+        // Game data based on the design document - now with emojis as visual representations
+        const vocabulary = [
+            {french: "le canapé", english: "the sofa", emoji: "🛋️" },
+            {french: "la chaise", english: "the chair", emoji: "🪑"},
+            {french: "la table", english: "the table", emoji: "⬜"},
+            {french: "la lampe", english: "the lamp", emoji: "💡"},
+            {french: "la télévision", english: "the television", emoji: "📺"},
+            {french: "la télécommande", english: "the remote control", emoji: "📱"},
+            {french: "le tapis", english: "the rug", emoji: "🟫"},
+            {french: "le coussin", english: "the pillow", emoji: "🫧"},
+            {french: "le livre", english: "the book", emoji: "📚"},
+            {french: "le sac à dos", english: "the backpack", emoji: "🎒"},
+            {french: "la fenêtre", english: "the window", emoji: "🪟"},
+            {french: "la porte", english: "the door", emoji: "🚪"},
+            {french: "l'horloge", english: "the clock", emoji: "⏱️"},
+            {french: "le tableau", english: "the picture", emoji: "🖼️"},
+            {french: "la couverture", english: "the blanket", emoji: "🛌"},
+            {french: "le jouet", english: "the toy", emoji: "🧸"},
+            {french: "la tasse", english: "the cup", emoji: "☕"},
+            {french: "la banane", english: "the banana", emoji: "🍌"},
+            {french: "la boîte", english: "the box", emoji: "📦"},
+            {french: "la clé", english: "the key", emoji: "🗝️"}
+        ];
+
+        // Game state
+        let currentWordIndex = 0;
+        let currentPhase = 'A';
+        let wordsCompleted = 0;
+        let feathers = 0;
+        let correctAnswers = 0;
+        let totalAnswers = 0;
+        let isListening = false;
+
+        // Initialize game
+        function initGame() {
+            createRoomScene();
+            updateDisplay();
+            updateStats();
+            playPollySound();
+        }
+
+        function createRoomScene() {
+            const roomScene = document.getElementById('roomScene');
+            roomScene.innerHTML = '';
+            
+            // Create shuffled items for the room
+            const shuffledVocabulary = [...vocabulary].sort(() => Math.random() - 0.5);
+            
+            shuffledVocabulary.forEach((word, index) => {
+                const item = document.createElement('div');
+                item.className = 'room-item';
+                
+                // Create emoji display
+                const emojiDiv = document.createElement('div');
+                emojiDiv.className = 'emoji';
+                emojiDiv.textContent = word.emoji;
+                
+                // Create label (French word without articles for cleaner display)
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'label';
+                labelDiv.textContent = word.french.replace(/^(le|la|l')/, '').trim();
+                
+                item.appendChild(emojiDiv);
+                item.appendChild(labelDiv);
+                
+                item.dataset.word = word.french;
+                item.dataset.index = index;
+                item.onclick = () => selectItem(word.french, item);
+                roomScene.appendChild(item);
+            });
+
+            highlightCurrentItem();
+        }
+
+        function highlightCurrentItem() {
+            const items = document.querySelectorAll('.room-item');
+            items.forEach(item => {
+                item.classList.remove('current');
+                if (item.dataset.word === vocabulary[currentWordIndex].french) {
+                    item.classList.remove('current');
+                }
+            });
+        }
+
+        function selectItem(word, element) {
+            if (currentPhase !== 'A') return;
+
+            totalAnswers++;
+            
+            if (word === vocabulary[currentWordIndex].french) {
+                element.classList.add('found');
+                element.classList.remove('current');
+                showFeedback('feedbackA', '✅ Excellent! That\'s correct!', 'success');
+                correctAnswers++;
+                feathers += 10;
+                
+                setTimeout(() => {
+                    nextWord();
+                }, 1000);
+            } else {
+                showFeedback('feedbackA', '❌ Try again! Listen carefully.', 'error');
+                playPollySound();
+            }
+            
+            updateStats();
+        }
+
+        function nextWord() {
+            currentWordIndex++;
+            
+            if (currentWordIndex >= vocabulary.length) {
+                nextPhase();
+                return;
+            }
+            
+            updateDisplay();
+            highlightCurrentItem();
+            clearFeedback();
+        }
+
+        function nextPhase() {
+            document.getElementById('nextButton').disabled = true;
+            
+            if (currentPhase === 'A') {
+                if (currentWordIndex >= vocabulary.length) {
+                    currentPhase = 'B';
+                    currentWordIndex = 0;
+                    switchToPhaseB();
+                }
+            } else if (currentPhase === 'B') {
+                currentPhase = 'C';
+                switchToPhaseC();
+            } else if (currentPhase === 'C') {
+                if (currentWordIndex >= vocabulary.length - 1) {
+                    completeQuest();
+                } else {
+                    currentWordIndex++;
+                    updateSpellingDisplay();
+                }
+            }
+        }
+
+        function switchToPhaseB() {
+            document.getElementById('phaseAContent').classList.add('hidden');
+            document.getElementById('phaseBContent').classList.remove('hidden');
+            document.getElementById('phaseA').classList.remove('active');
+            document.getElementById('phaseA').classList.add('completed');
+            document.getElementById('phaseB').classList.add('active');
+            
+            updateDisplay();
+            clearFeedback();
+        }
+
+        function switchToPhaseC() {
+            document.getElementById('phaseBContent').classList.add('hidden');
+            document.getElementById('phaseCContent').classList.remove('hidden');
+            document.getElementById('phaseB').classList.remove('active');
+            document.getElementById('phaseB').classList.add('completed');
+            document.getElementById('phaseC').classList.add('active');
+            
+            currentWordIndex = 0;
+            updateSpellingDisplay();
+            clearFeedback();
+        }
+
+        function startListening() {
+            if (isListening) return;
+            // Check if browser supports speech recognition
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+             alert('Speech recognition not supported in this browser. Please use Chrome or Edge.');
+             return;
+            }
+    
+            
+            isListening = true;
+            const micButton = document.getElementById('micButton');
+            const speechStatus = document.getElementById('speechStatus');
+            
+            micButton.classList.add('listening');
+            speechStatus.textContent = 'Requesting microphone access...';
+            
+            // Create speech recognition instance
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+             recognition.lang = 'fr-FR'; // French language
+             recognition.interimResults = false;
+             recognition.maxAlternatives = 1;
+            
+            recognition.onresult = (event) => {
+                const spokenWord = event.results[0][0].transcript.toLowerCase().trim();
+                const targetWord = vocabulary[currentWordIndex].french.toLowerCase();
+        
+                 // Check if spoken word matches (with some flexibility)
+                const isCorrect = spokenWord.includes(targetWord.replace(/^(le|la|l')\s*/, ''));
+        
+                isListening = false;
+                micButton.classList.remove('listening');
+        
+                if (isCorrect) {
+                speechStatus.textContent = 'Perfect! Correct pronunciation!';
+                showFeedback('feedbackB', '🎉 Great pronunciation!', 'success');
+                correctAnswers++;
+                feathers += 15;
+            
+            
+                setTimeout(() => {
+                    if (currentWordIndex < vocabulary.length - 1) {
+                        currentWordIndex++;
+                        updateDisplay();
+                        speechStatus.textContent = 'Ready to listen';
+                        clearFeedback();
+                    } else {
+                        document.getElementById('nextButton').disabled = false;
+                    }
+                }, 1500);
+                } else {
+                    speechStatus.textContent = 'Try again!';
+                    showFeedback('feedbackB', '🔄 Try again, you can do it!', 'error');
+                }
+                
+                totalAnswers++;
+                updateStats();
+            };
+            recognition.onerror = (event) => {
+                isListening = false;
+                micButton.classList.remove('listening');
+
+                let errorMessage = '';
+                switch(event.error) {
+                case 'not-allowed':
+                    errorMessage = 'Microphone access denied. Please allow microphone access in your browser settings and reload the page.';
+                    break;
+                case 'no-speech':
+                    errorMessage = 'No speech detected. Try again!';
+                    break;
+                case 'network':
+                    errorMessage = 'Network error. Check your internet connection.';
+                    break;
+                case 'audio-capture':
+                    errorMessage = 'No microphone found. Please connect a microphone.';
+                    break;
+                default:
+                    errorMessage = 'Error: ' + event.error;
+        }
+        speechStatus.textContent = 'Error: ' + event.error;
+    };
+    
+    recognition.start();
+        }
+
+        function skipSpeech() {
+            if (currentWordIndex < vocabulary.length - 1) {
+                currentWordIndex++;
+                updateDisplay();
+                document.getElementById('speechStatus').textContent = 'Ready to listen';
+                clearFeedback();
+            } else {
+                document.getElementById('nextButton').disabled = false;
+            }
+        }
+
+        function updateSpellingDisplay() {
+            const word = vocabulary[currentWordIndex];
+            document.getElementById('currentWordC').textContent = word.french.replace(/./g, '_ ').trim();
+            document.getElementById('currentWordCEnglish').textContent = word.english;
+            // Hide hint initially
+            document.getElementById('currentWordCEnglish').classList.add('hidden');
+            
+            createSpellingInterface(word.french);
+        }
+
+        function createSpellingInterface(word) {
+            const letterSlots = document.getElementById('letterSlots');
+            const letterOptions = document.getElementById('letterOptions');
+            
+            letterSlots.innerHTML = '';
+            letterOptions.innerHTML = '';
+            
+            // Create slots for each character including spaces and apostrophes
+            for (let i = 0; i < word.length; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'letter-slot';
+                slot.dataset.index = i;
+                
+                if (word[i] === ' ' || word[i] === '\'') {
+                    slot.textContent = word[i];
+                    slot.style.background = '#f0f0f0';
+                } else {
+                    slot.onclick = () => removeFromSlot(i);
+                }
+                
+                letterSlots.appendChild(slot);
+            }
+            
+            // Create letter options (including some distractors)
+            const wordLetters = word.toLowerCase().replace(/[^a-zàâäéèêëïîôöùûüÿç]/g, '').split('');
+            const allLetters = [...new Set(wordLetters)];
+            
+            // Add some distractor letters
+            const distractors = ['x', 'w', 'k', 'j', 'q', 'z'];
+            const numDistractors = Math.min(3, Math.floor(allLetters.length / 2));
+            
+            for (let i = 0; i < numDistractors; i++) {
+                const randomDistractor = distractors[Math.floor(Math.random() * distractors.length)];
+                if (!allLetters.includes(randomDistractor)) {
+                    allLetters.push(randomDistractor);
+                }
+            }
+            
+            // Shuffle and create options
+            allLetters.sort(() => Math.random() - 0.5);
+            
+            allLetters.forEach(letter => {
+                const option = document.createElement('div');
+                option.className = 'letter-option';
+                option.textContent = letter;
+                option.onclick = () => selectLetter(letter, option);
+                letterOptions.appendChild(option);
+            });
+        }
+
+        function selectLetter(letter, optionElement) {
+            if (optionElement.classList.contains('used')) return;
+            
+            const word = vocabulary[currentWordIndex].french.toLowerCase();
+            const slots = document.querySelectorAll('.letter-slot');
+            
+            // Find first empty slot that should contain this letter
+            for (let i = 0; i < slots.length; i++) {
+                if (slots[i].textContent === '' && word[i] === letter) {
+                    slots[i].textContent = letter;
+                    optionElement.classList.add('used');
+                    checkSpelling();
+                    return;
+                }
+            }
+            
+            // If no correct position found, show error
+            showFeedback('feedbackC', '❌ This letter doesn\'t go here!', 'error');
+        }
+
+        function removeFromSlot(index) {
+            const slots = document.querySelectorAll('.letter-slot');
+            const letter = slots[index].textContent.toLowerCase();
+            
+            if (letter && letter !== ' ' && letter !== '\'') {
+                slots[index].textContent = '';
+                
+                // Re-enable the letter option
+                const options = document.querySelectorAll('.letter-option');
+                options.forEach(option => {
+                    if (option.textContent === letter && option.classList.contains('used')) {
+                        option.classList.remove('used');
+                        return;
+                    }
+                });
+            }
+        }
+
+        function checkSpelling() {
+            const word = vocabulary[currentWordIndex].french.toLowerCase();
+            const slots = document.querySelectorAll('.letter-slot');
+            let currentSpelling = '';
+            
+            slots.forEach(slot => {
+                currentSpelling += slot.textContent.toLowerCase();
+            });
+            
+            if (currentSpelling === word) {
+                showFeedback('feedbackC', '🎉 Perfect! Word correctly spelled!', 'success');
+                correctAnswers++;
+                feathers += 20;
+                totalAnswers++;
+                updateStats();
+                
+                setTimeout(() => {
+                    if (currentWordIndex < vocabulary.length - 1) {
+                        currentWordIndex++;
+                        updateSpellingDisplay();
+                        clearFeedback();
+                    } else {
+                        document.getElementById('nextButton').disabled = false;
+                    }
+                }, 1500);
+            }
+        }
+
+        function clearSpelling() {
+            const slots = document.querySelectorAll('.letter-slot');
+            const options = document.querySelectorAll('.letter-option');
+            
+            slots.forEach(slot => {
+                if (slot.textContent !== ' ' && slot.textContent !== '\'') {
+                    slot.textContent = '';
+                }
+            });
+            
+            options.forEach(option => {
+                option.classList.remove('used');
+            });
+            
+            clearFeedback();
+        }
+
+        function completeQuest() {
+            document.getElementById('phaseCContent').classList.add('hidden');
+            document.getElementById('completionContent').classList.remove('hidden');
+            document.getElementById('phaseC').classList.remove('active');
+            document.getElementById('phaseC').classList.add('completed');
+            
+            wordsCompleted = vocabulary.length;
+            feathers += 100; // Bonus for completion
+            updateStats();
+            updateProgress();
+            
+            // Play celebration
+            setTimeout(() => {
+                alert('🎵 Polly\'s Song: "Le canapé, la chaise, la table~ La lampe, la télé~ Merci, merci, merci beaucoup!" 🎵');
+            }, 1000);
+        }
+
+        function showHint(elementId) {
+            const hintElement = document.getElementById(elementId);
+            hintElement.classList.remove('hidden');
+            
+            // Hide the hint after 3 seconds
+            setTimeout(() => {
+                hintElement.classList.add('hidden');
+            }, 3000);
+        }
+
+        function updateDisplay() {
+            if (currentPhase === 'A') {
+                const currentWord = vocabulary[currentWordIndex];
+                document.getElementById('currentWordFrench').textContent = currentWord.french;
+                document.getElementById('currentWordEnglish').textContent = currentWord.english;
+                // Hide hint initially
+                document.getElementById('currentWordEnglish').classList.add('hidden');
+            } else if (currentPhase === 'B') {
+                const currentWord = vocabulary[currentWordIndex];
+                document.getElementById('currentWordB').textContent = currentWord.french;
+                document.getElementById('currentWordBEnglish').textContent = currentWord.english;
+                // Hide hint initially
+                document.getElementById('currentWordBEnglish').classList.add('hidden');
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('wordsLearned').textContent = Math.floor(wordsCompleted + (currentWordIndex / vocabulary.length) * vocabulary.length);
+            document.getElementById('feathers').textContent = feathers;
+            
+            const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 100;
+            document.getElementById('accuracy').textContent = accuracy;
+        }
+
+        function updateProgress() {
+            const totalPhases = 3;
+            const currentProgress = currentPhase === 'A' ? 0 : currentPhase === 'B' ? 1 : currentPhase === 'C' ? 2 : 3;
+            const wordProgress = currentWordIndex / vocabulary.length;
+            const overallProgress = (currentProgress + wordProgress) / totalPhases * 100;
+            
+            document.getElementById('progressFill').style.width = overallProgress + '%';
+        }
+
+        function showFeedback(elementId, message, type) {
+            const feedback = document.getElementById(elementId);
+            feedback.textContent = message;
+            feedback.className = 'feedback ' + type;
+        }
+
+        function clearFeedback() {
+            const feedbacks = document.querySelectorAll('.feedback');
+            feedbacks.forEach(feedback => {
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+            });
+        }
+
+        function playPollySound() {
+            // In a real implementation, this would play audio
+            console.log('🦜 Polly: ' + vocabulary[currentWordIndex].french);
+        }
+
+        function playRexSound() {
+            // In a real implementation, this would play audio
+            console.log('🐕 Rex: Woof woof!');
+        }
+
+        function showInstructions() {
+            alert(`Welcome to Parrot Panic! 🦜
+
+Phase A - Listen: Click on the object that Polly names
+Phase B - Speak: Click the microphone and repeat the French word  
+Phase C - Write: Spell the word by clicking the letters
+
+Help Polly find all 20 objects to complete the quest!
+
+Each correct answer earns you feathers 🪶 that you can spend in the shop.`);
+        }
+
+        function restartGame() {
+            currentWordIndex = 0;
+            currentPhase = 'A';
+            wordsCompleted = 0;
+            correctAnswers = 0;
+            totalAnswers = 0;
+            feathers = 0;
+            
+            // Reset UI
+            document.getElementById('completionContent').classList.add('hidden');
+            document.getElementById('phaseAContent').classList.remove('hidden');
+            document.getElementById('phaseA').className = 'phase active';
+            document.getElementById('phaseB').className = 'phase';
+            document.getElementById('phaseC').className = 'phase';
+            
+            initGame();
+        }
+
+        // Initialize the game when page loads
+        window.onload = function() {
+            initGame();
+            
+            // Update progress periodically
+            setInterval(updateProgress, 500);
+        };
+    </script>
+</body>
+</html>

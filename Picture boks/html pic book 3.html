@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Little Builder's Interactive World</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+            background-color: #FFFBF5;
+            color: #5C5470;
+        }
+        .storybook-title {
+            font-family: 'Lucida Handwriting', 'Brush Script MT', cursive;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #FF6B6B;
+            border-bottom-color: #FF6B6B;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .interactive-tag {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background-color: #f0e6ff;
+            border-bottom: 3px solid #dcbaff;
+        }
+        .interactive-tag:hover {
+            transform: scale(1.05);
+            background-color: #dcbaff;
+        }
+        .house-part {
+            transition: all 0.4s ease-in-out;
+            border: 4px dashed transparent;
+        }
+        .highlight {
+            background-color: #FFD93D !important;
+            border-color: #FF6B6B !important;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background-color: #FFFBF5;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="navbar" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-[#4D455D] storybook-title">The Builder's World</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#intro" class="nav-link text-lg">Archi's Start</a>
+                <a href="#foundation" class="nav-link text-lg">The Foundation</a>
+                <a href="#two-worlds" class="nav-link text-lg">The Two Worlds</a>
+                <a href="#mailbox" class="nav-link text-lg">The Mailbox</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        
+        <section id="intro" class="text-center py-16">
+            <h2 class="text-5xl md:text-6xl font-bold storybook-title text-[#E96479]">The Little Builder's Digital World</h2>
+            <p class="mt-6 text-xl md:text-2xl max-w-3xl mx-auto">In a place where nothing was, a little builder named Archi decided to build a brand new world. He started with the most important line of all, a magical spell to begin his creation:</p>
+            <div class="mt-8 inline-block bg-[#7DB9B6] text-white p-4 rounded-lg text-2xl font-mono shadow-xl">
+                &lt;!DOCTYPE html&gt;
+            </div>
+            <p class="mt-4 text-lg">This told his magic tools what kind of world he was building!</p>
+        </section>
+
+        <section id="foundation" class="py-16">
+            <h2 class="text-4xl font-bold text-center mb-4 storybook-title text-[#4D455D]">Building the Foundation</h2>
+            <p class="text-center text-lg max-w-2xl mx-auto mb-12">Every world needs a strong structure. Archi used special tags to build his house. Click on the tags below to learn more about each part!</p>
+            
+            <div class="flex flex-col md:flex-row gap-8 items-center">
+                <div class="w-full md:w-1/3 space-y-4">
+                    <div id="tag-html" class="interactive-tag p-4 rounded-lg text-center text-lg font-bold">
+                        &lt;html&gt; - The Whole House
+                    </div>
+                     <div id="tag-head" class="interactive-tag p-4 rounded-lg text-center text-lg font-bold">
+                        &lt;head&gt; - The Secret Control Room
+                    </div>
+                     <div id="tag-body" class="interactive-tag p-4 rounded-lg text-center text-lg font-bold">
+                        &lt;body&gt; - The Main Living Space
+                    </div>
+                </div>
+
+                <div class="w-full md:w-2/3">
+                    <div id="house-html" class="house-part bg-[#F5E9CF] p-4 rounded-2xl border-4 border-dashed border-gray-400">
+                        <div id="house-head" class="house-part bg-[#C7E9B0] p-4 rounded-t-xl mb-2 text-center">
+                            <h3 class="font-bold text-xl text-[#5C5470]">The &lt;head&gt;</h3>
+                            <p id="explanation-text" class="text-md mt-2 h-12">Click a tag to learn more!</p>
+                        </div>
+                        <div id="house-body" class="house-part bg-[#A0C3D2] p-8 rounded-b-xl text-center">
+                            <h3 class="font-bold text-xl text-[#4D455D]">The &lt;body&gt;</h3>
+                            <p class="text-md mt-2">Everything you can see goes in here!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="two-worlds" class="py-16">
+            <h2 class="text-4xl font-bold text-center mb-4 storybook-title text-[#4D455D]">The Two Worlds</h2>
+            <p class="text-center text-lg max-w-3xl mx-auto mb-12">Archi's world has two very important parts: the colorful "Front-end" that everyone sees, and the magical "Back-end" engine room that makes it all work. Click the cards to meet the helpers!</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                
+                <div class="bg-gradient-to-br from-[#FFD9B7] to-[#F5E9CF] p-8 rounded-2xl shadow-lg">
+                    <h3 class="text-3xl font-bold text-center storybook-title text-[#E96479] mb-6">🎨 Zaina's Front-End World</h3>
+                    <div class="space-y-4">
+                        <div class="card p-5 bg-white rounded-xl">
+                            <h4 class="font-bold text-xl">HTML - The Builder</h4>
+                            <p>The solid bones and structure of every building.</p>
+                        </div>
+                        <div class="card p-5 bg-white rounded-xl">
+                            <h4 class="font-bold text-xl">CSS - The Painter</h4>
+                            <p>Adds all the beautiful colors, styles, and decorations.</p>
+                        </div>
+                         <div class="card p-5 bg-white rounded-xl">
+                            <h4 class="font-bold text-xl">JavaScript - The Magician</h4>
+                            <p>Makes things move and work, like opening doors or turning on lights!</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-br from-[#B4CDE6] to-[#A0C3D2] p-8 rounded-2xl shadow-lg">
+                    <h3 class="text-3xl font-bold text-center storybook-title text-[#4D455D] mb-6">⚙️ Jinn's Back-End World</h3>
+                    <div class="space-y-4">
+                       <div class="card p-5 bg-white rounded-xl">
+                            <h4 class="font-bold text-xl">Python & PHP</h4>
+                            <p>Clever messengers who talk to databases and find information.</p>
+                        </div>
+                        <div class="card p-5 bg-white rounded-xl">
+                            <h4 class="font-bold text-xl">Node & Golang</h4>
+                            <p>Super-fast engines that handle many tasks at once.</p>
+                        </div>
+                         <div class="card p-5 bg-white rounded-xl">
+                            <h4 class="font-bold text-xl">Java</h4>
+                            <p>A powerful and reliable worker for big, important jobs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="mailbox" class="py-16">
+            <h2 class="text-4xl font-bold text-center mb-4 storybook-title text-[#4D455D]">The Magical Mailbox</h2>
+            <p class="text-center text-lg max-w-2xl mx-auto mb-12">In the "Contacts" neighborhood, Archi built a special mailbox for visitors to leave messages. See how it works!</p>
+            <div class="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-2xl">
+                <form>
+                    <div class="mb-4">
+                        <label for="firstName" class="block font-bold mb-2 text-lg">First Name</label>
+                        <input type="text" id="firstName" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B6B] outline-none transition-all" placeholder="Tell us your name!">
+                    </div>
+                     <div class="mb-4">
+                        <label for="email" class="block font-bold mb-2 text-lg">Email</label>
+                        <input type="email" id="email" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B6B] outline-none transition-all" placeholder="How can we write back?">
+                    </div>
+                     <div class="mb-6">
+                        <label for="message" class="block font-bold mb-2 text-lg">Message</label>
+                        <textarea id="message" rows="4" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-[#FF6B6B] outline-none transition-all" placeholder="What would you like to say?"></textarea>
+                    </div>
+                    <button type="button" class="w-full bg-[#E96479] text-white font-bold py-3 px-4 rounded-lg hover:bg-[#d85368] transition-colors text-xl">
+                        Send Message
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#4D455D] text-white text-center py-6">
+        <p>Copyright 2025 | Built with ❤️ by Archi, Zaina, and Jinn</p>
+    </footer>
+
+    <div id="details-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl font-bold">&times;</button>
+            <div id="modal-body">
+                
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            function updateActiveLink() {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 60) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', updateActiveLink);
+            updateActiveLink();
+
+            const houseParts = {
+                html: {
+                    el: document.getElementById('house-html'),
+                    text: 'The <html> tag is the biggest container, like the whole house itself!'
+                },
+                head: {
+                    el: document.getElementById('house-head'),
+                    text: 'The <head> holds the page title and other important info that you don\'t always see.'
+                },
+                body: {
+                    el: document.getElementById('house-body'),
+                    text: 'The <body> holds all the visible content: text, pictures, and buttons!'
+                }
+            };
+
+            const allParts = Object.values(houseParts).map(p => p.el);
+            const explanationText = document.getElementById('explanation-text');
+
+            function highlightPart(part) {
+                allParts.forEach(p => p.classList.remove('highlight'));
+                if (houseParts[part]) {
+                    houseParts[part].el.classList.add('highlight');
+                    explanationText.textContent = houseParts[part].text;
+                }
+            }
+            
+            const modal = document.getElementById('details-modal');
+            const modalBody = document.getElementById('modal-body');
+            const closeModalBtn = document.getElementById('close-modal');
+
+            const tagDetails = {
+                html: {
+                    title: '&lt;html&gt; - The Big Box',
+                    story: 'Imagine Archi has a giant cardboard box. This box is the **`<html>`** tag. It’s the very first thing he puts down, and everything else he builds—the walls, the furniture, the toys—all have to fit inside this one big box. It’s the container for his entire digital world!',
+                    icon: '📦'
+                },
+                head: {
+                    title: '&lt;head&gt; - The Secret Control Room',
+                    story: 'Before building the rooms, Archi builds a secret control room at the top of his house. This is the **`<head>`** tag. Visitors can’t go inside, but it holds all the important plans, maps, and magical spells that tell the house how to behave and what to look like. It’s the brain of the world!',
+                    icon: '🧠'
+                },
+                body: {
+                    title: '&lt;body&gt; - The Main Living Space',
+                    story: 'This is the fun part! The **`<body>`** tag is the main living space of the house. This is where Archi puts all the furniture, hangs up the pictures, and places all the toys. Everything you can see and interact with on the page—text, images, buttons—all live inside this one big room.',
+                    icon: '🏠'
+                }
+            };
+
+            function showDetails(tag) {
+                const details = tagDetails[tag];
+                if (details) {
+                    modalBody.innerHTML = `
+                        <h3 class="text-4xl font-bold mb-4 storybook-title text-[#E96479]">${details.icon} ${details.title}</h3>
+                        <p class="text-lg mt-4">${details.story}</p>
+                    `;
+                    highlightPart(tag);
+                    modal.classList.remove('hidden');
+                }
+            }
+
+            document.getElementById('tag-html').addEventListener('click', () => showDetails('html'));
+            document.getElementById('tag-head').addEventListener('click', () => showDetails('head'));
+            document.getElementById('tag-body').addEventListener('click', () => showDetails('body'));
+
+            closeModalBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                allParts.forEach(p => p.classList.remove('highlight'));
+                explanationText.textContent = 'Click a tag to learn more!';
+            });
+
+        });
+    </script>
+</body>
+</html>

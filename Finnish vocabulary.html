@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Finnish Vocabulary</title>
+    <style>
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .category-btn.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .category-icon {
+            font-size: 40px;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .category-count {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .vocab-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .vocab-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .vocab-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .vocab-finnish {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .vocab-english {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .learning-display {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .word-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .finnish-word {
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .syllables {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .syllable {
+            background: #f0f4ff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s;
+        }
+
+        .syllable.active {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .english-translation {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .progress {
+            margin-top: 30px;
+            text-align: center;
+            color: #666;
+        }
+
+        .speed-control {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .speed-control label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .speed-control select {
+            padding: 8px 15px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            background: white;
+        }
+
+        .exit-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10000;
+            pointer-events: auto;
+        }
+
+        .exit-btn:hover {
+            background: #ff0000;
+            transform: translateY(-2px) scale(1.1);
+        }
+
+        .test-display {
+            text-align: center;
+            padding: 60px 40px 40px 40px;
+        }
+
+        .question-counter {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .answer-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .answer-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .answer-btn.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .answer-btn.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .results-summary {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .score {
+            font-size: 64px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .results-table {
+            margin: 30px auto;
+            max-width: 600px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .instruction-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        /* Sentence builder styles */
+        .sentence-screen {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .word-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .word-chip {
+            background: #fff;
+            border: 2px solid #667eea;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: grab;
+            user-select: none;
+            font-weight: 600;
+        }
+
+        .drop-zone {
+            min-height: 56px;
+            border: 2px dashed #cfd8dc;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            background: #fafafa;
+        }
+
+        .sentence-controls { margin-top: 18px; display:flex; gap:10px; justify-content:center; }
+
+        .hint-area { margin-top: 12px; color: #1565c0; font-weight: 700; }
+        /* Plural ending highlight */
+        .ending-highlight { color: #155724; background: #d4edda; padding: 2px 6px; border-radius: 6px; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇫🇮 Learn Finnish Vocabulary</h1>
+            <p>Master vocabulary through syllable-based learning</p>
+        </div>
+
+        <div class="content">
+            <!-- Category Selection Screen -->
+            <div id="categoryScreen" class="screen active">
+                <h2 style="margin-bottom: 20px;">Choose a Category</h2>
+                <div class="category-grid">
+                    <button class="category-btn" onclick="selectCategory('living-room')">
+                        <span class="category-icon">🛋️</span>
+                        <span class="category-name">Living Room</span>
+                        <span class="category-count" id="count-living-room">0 words</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('kitchen')">
+                        <span class="category-icon">🍳</span>
+                        <span class="category-name">Kitchen</span>
+                        <span class="category-count" id="count-kitchen">0 words</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('bathroom')">
+                        <span class="category-icon">🚿</span>
+                        <span class="category-name">Bathroom</span>
+                        <span class="category-count" id="count-bathroom">0 words</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('bedroom')">
+                        <span class="category-icon">🛏️</span>
+                        <span class="category-name">Bedroom</span>
+                        <span class="category-count" id="count-bedroom">0 words</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('school')">
+                        <span class="category-icon">🎒</span>
+                        <span class="category-name">School</span>
+                        <span class="category-count" id="count-school">0 words</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('restaurant')">
+                        <span class="category-icon">🍽️</span>
+                        <span class="category-name">Restaurant</span>
+                        <span class="category-count" id="count-restaurant">0 words</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('airport')">
+                        <span class="category-icon">✈️</span>
+                        <span class="category-name">Airport</span>
+                        <span class="category-count" id="count-airport">0 words</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('plurals')">
+                        <span class="category-icon">🔤</span>
+                        <span class="category-name">Plurals</span>
+                        <span class="category-count" id="count-plurals">0 words</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('plural-rules')">
+                        <span class="category-icon">📘</span>
+                        <span class="category-name">Plural Rules</span>
+                        <span class="category-count" id="count-plural-rules">Guide</span>
+                    </button>
+                </div>
+                <div style="text-align: center; margin-top: 30px; padding-top: 30px; border-top: 2px solid #e0e0e0;">
+                    <h3 style="margin-bottom: 15px; color: #667eea;">Or try the Spelling Challenge!</h3>
+                    <button class="btn" onclick="startSpellingTest()" style="font-size: 18px; padding: 20px 50px;">
+                        ✏️ Spelling Test - All Categories
+                    </button>
+                    <p style="color: #666; margin-top: 10px; font-size: 14px;">Test your spelling across all 103 words!</p>
+                </div>
+            </div>
+
+            <!-- Preview Screen -->
+            <div id="previewScreen" class="screen">
+                <h2>Vocabulary Preview</h2>
+                <div id="vocabPreview" class="vocab-preview"></div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="backToCategories()">Back</button>
+                    <button class="btn" onclick="startLearning()">Start Learning</button>
+                    <button class="btn" onclick="skipToTest()">Skip to Test</button>
+                    <button class="btn" onclick="startSentenceBuilder()">Sentence Builder</button>
+                </div>
+            </div>
+
+            <!-- Sentence Builder Screen -->
+            <div id="sentenceScreen" class="screen">
+                <div class="sentence-screen">
+                    <h2 id="sentenceEnglish">Sentence: </h2>
+                    <div id="sentenceProgress" style="color:#666; margin-bottom:8px;"></div>
+                    <p style="color:#666; margin-bottom:10px;">Drag the Finnish words below to form the correct sentence.</p>
+
+                    <div class="drop-zone" id="sentenceDrop" aria-label="Sentence drop zone"></div>
+
+                    <div class="word-pool" id="wordPool"></div>
+
+                    <div class="sentence-controls">
+                        <button class="btn" onclick="checkSentence()">Check Answer</button>
+                        <button class="btn btn-secondary" onclick="shufflePool()">Shuffle</button>
+                        <button class="btn btn-secondary" onclick="showHintSentence()">Show Hint</button>
+                        <button class="btn btn-secondary" onclick="nextSentence()">Next</button>
+                        <button class="btn btn-secondary" onclick="backToPreview()">Back to Preview</button>
+                    </div>
+
+                    <div id="sentenceHint" class="hint-area" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- Learning Screen -->
+            <div id="learningScreen" class="screen">
+                <div class="learning-display">
+                    <!-- Back to Review replaces the exit button -->
+                    <button class="btn btn-secondary" style="position: fixed; top: 20px; right: 20px; z-index:10000;" onclick="backToPreview()">← Back to Review</button>
+                    <div class="finnish-word" id="finnishWord" style="min-height: 60px;"></div>
+                    <div class="english-translation" id="englishWord"></div>
+                    <div class="word-icon" id="wordIcon"></div>
+                    <div class="speed-control">
+                        <label for="speedSelect">Playback Speed:</label>
+                        <select id="speedSelect" onchange="updateSpeed()">
+                            <option value="800">Slow</option>
+                            <option value="500" selected>Medium</option>
+                            <option value="300">Fast</option>
+                        </select>
+                    </div>
+                    <div style="margin-top: 30px;">
+                        <button class="btn" onclick="repeatWord()">🔊 Repeat</button>
+                    </div>
+                    <button class="btn" style="margin-top: 20px;" onclick="skipToTestFromLearning()">Skip to Test</button>
+                    <div class="progress" id="learningProgress"></div>
+                </div>
+            </div>
+
+            <!-- Test Instructions Screen -->
+            <div id="testInstructionsScreen" class="screen">
+                <h2>Ready for the Test?</h2>
+                <div class="instruction-box">
+                    <p id="testIntroText">You've completed the learning phase! Now let's test your knowledge.</p>
+                    <ul style="margin-top: 15px; margin-left: 20px;">
+                        <li>You'll see an icon and English word</li>
+                        <li>Choose the correct Finnish translation</li>
+                        <li>Try to answer as quickly as possible</li>
+                        <li>You'll see your results at the end</li>
+                    </ul>
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="backToPreview()">Back to Preview</button>
+                    <button class="btn" onclick="startTest()">Start Test</button>
+                </div>
+            </div>
+
+            <!-- Test Screen -->
+            <div id="testScreen" class="screen">
+                <div class="test-display">
+                    <!-- Back to Review replaces the exit button for clarity -->
+                    <button class="btn btn-secondary" style="position: fixed; top: 20px; right: 20px; z-index:10000;" onclick="backToPreview()">← Back to Review</button>
+                    <div class="question-counter" id="questionCounter"></div>
+                    <div class="word-icon" id="testIcon"></div>
+                    <div class="english-translation" id="testEnglish" style="font-size: 28px; font-weight: 600; color: #333;"></div>
+                    <div class="answer-options" id="answerOptions"></div>
+                    <div class="progress" id="testProgress"></div>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="resultsScreen" class="screen">
+                <div class="results-summary">
+                    <h2>Test Complete! 🎉</h2>
+                    <div class="score" id="finalScore"></div>
+                    <div class="results-table" id="resultsTable"></div>
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="btn" onclick="restartApp()">Try Another Category</button>
+                        <button class="btn btn-secondary" onclick="retakeTest()">Retake Test</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spelling Test Screen -->
+            <div id="spellingTestScreen" class="screen">
+                <div class="test-display">
+                    <!-- Back to Review for spelling test -->
+                    <button class="btn btn-secondary" style="position: fixed; top: 20px; right: 20px; z-index:10000;" onclick="backToPreview()">← Back to Review</button>
+                    <div class="question-counter" id="spellingCounter"></div>
+                    <div class="word-icon" id="spellingIcon" style="font-size: 100px; margin-bottom: 20px;"></div>
+                    <div class="english-translation" id="spellingEnglish" style="font-size: 32px; font-weight: 600; color: #333; margin-bottom: 30px;"></div>
+                    
+                    <div style="max-width: 500px; margin: 0 auto;">
+                        <input type="text" id="spellingInput" placeholder="Type the Finnish word here..." 
+                               style="width: 100%; padding: 20px; font-size: 24px; border: 3px solid #667eea; 
+                               border-radius: 12px; text-align: center; margin-bottom: 20px; outline: none;"
+                               onkeypress="handleSpellingEnter(event)">
+                        
+                        <div id="spellingFeedback" style="min-height: 40px; font-size: 18px; font-weight: 600; margin-bottom: 20px;"></div>
+                        
+                        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                            <button class="btn" onclick="submitSpelling()" id="submitSpellingBtn">Submit Answer</button>
+                            <button class="btn btn-secondary" onclick="showHint()" id="hintBtn">💡 Show Hint</button>
+                        </div>
+                        
+                        <div id="hintDisplay" style="margin-top: 20px; padding: 15px; background: #fff3cd; 
+                             border-radius: 8px; font-size: 20px; font-weight: 600; color: #856404; display: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="progress" id="spellingProgress"></div>
+                </div>
+            </div>
+            
+            <!-- Plural Rules Screen -->
+            <div id="pluralRulesScreen" class="screen">
+                <div style="padding:40px;">
+                    <h2>Plural Rules</h2>
+                    <p style="color:#666;">Tap a rule group to view the vocabulary examples.</p>
+
+                    <div id="pluralTabs" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+                        <button class="btn btn-secondary" onclick="showPluralTab('group1')">-i → +t / vowel + -t</button>
+                        <button class="btn btn-secondary" onclick="showPluralTab('group2')">-e → -et</button>
+                        <button class="btn btn-secondary" onclick="showPluralTab('group3')">-as → -aa-t</button>
+                        <button class="btn btn-secondary" onclick="showPluralTab('groupN')">-nen → -set</button>
+                        <button class="btn" onclick="backToPreview()">Back</button>
+                    </div>
+
+                    <div id="pluralContent">
+                        <div id="group1" class="plural-tab" style="display:none;">
+                            <h3>Group 1 — new -i → +t / vowel + -t</h3>
+                            <table style="width:100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="text-align:left; border-bottom:1px solid #ddd;"><th>Plural</th><th>Singular</th><th>Meaning</th><th>Rule</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>peili<span class="ending-highlight">t</span></strong></td><td>peili</td><td>mirrors</td><td>new -i → + <span class="ending-highlight">t</span></td></tr>
+                                    <tr><td><strong>kasvi<span class="ending-highlight">t</span></strong></td><td>kasvi</td><td>plants</td><td>new -i → + <span class="ending-highlight">t</span></td></tr>
+                                    <tr><td><strong>passi<span class="ending-highlight">t</span></strong></td><td>passi</td><td>passports</td><td>new -i → + <span class="ending-highlight">t</span></td></tr>
+                                    <tr><td><strong>tiski<span class="ending-highlight">t</span></strong></td><td>tiski</td><td>counters</td><td>new -i → + <span class="ending-highlight">t</span></td></tr>
+                                    <tr><td><strong>käsi<span class="ending-highlight">et</span></strong></td><td>käsi</td><td>hand(s)</td><td>internal vowel/stem change (käsi → <span class="ending-highlight">kädet</span>)</td></tr>
+                                    <tr><td><strong>reisi<span class="ending-highlight">et</span></strong></td><td>reisi</td><td>thigh(s)</td><td>internal stem change (reisi → <span class="ending-highlight">reidet</span>)</td></tr>
+                                    <tr><td><strong>vuosi<span class="ending-highlight">det</span></strong></td><td>vuosi</td><td>year(s)</td><td>stem alternation (vuosi → <span class="ending-highlight">vuodet</span>)</td></tr>
+                                    <tr><td><strong>vesi<span class="ending-highlight">det</span></strong></td><td>vesi</td><td>water(s) / bodies of water</td><td>stem alternation (vesi → <span class="ending-highlight">vedet</span>)</td></tr>
+                                    <tr><td><strong>susi<span class="ending-highlight">t</span></strong></td><td>susi</td><td>wolf/wolves</td><td>regular plural <span class="ending-highlight">-t</span> (susi → <span class="ending-highlight">sudet</span>)</td></tr>
+                                    <tr><td><strong>kuukausi<span class="ending-highlight">det</span></strong></td><td>kuukausi</td><td>month(s)</td><td>compound/stem change (kuukausi → <span class="ending-highlight">kuukaudet</span>)</td></tr>
+                                    <tr><td><strong>toveri<span class="ending-highlight">t</span></strong></td><td>toveri</td><td>friend(s)</td><td>exception (loan-type -i word) — plural <span class="ending-highlight">toverit</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="group2" class="plural-tab" style="display:none;">
+                            <h3>Group 2 — -e → -et</h3>
+                            <table style="width:100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="text-align:left; border-bottom:1px solid #ddd;"><th>Plural</th><th>Singular</th><th>Meaning</th><th>Rule</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>pyyhke<span class="ending-highlight">et</span></strong></td><td>pyyhe</td><td>towels</td><td><span class="ending-highlight">-e → -et</span></td></tr>
+                                    <tr><td><strong>tuotte<span class="ending-highlight">et</span></strong></td><td>tuote</td><td>products</td><td><span class="ending-highlight">-e → -et</span></td></tr>
+                                    <tr><td><strong>lentokone<span class="ending-highlight">et</span></strong></td><td>lentokone</td><td>airplanes</td><td><span class="ending-highlight">-e → -et</span></td></tr>
+                                    <tr><td><strong>tietokone<span class="ending-highlight">et</span></strong></td><td>tietokone</td><td>computers</td><td><span class="ending-highlight">-e → -et</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="group3" class="plural-tab" style="display:none;">
+                            <h3>Group 3 — -as → -aa-t / other stem changes</h3>
+                            <table style="width:100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="text-align:left; border-bottom:1px solid #ddd;"><th>Plural</th><th>Singular</th><th>Meaning</th><th>Rule</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>hamp<span class="ending-highlight">aat</span></strong></td><td>hammas</td><td>teeth</td><td>-as → <span class="ending-highlight">-aa-t</span></td></tr>
+                                    <tr><td><strong>asiakka<span class="ending-highlight">at</span></strong></td><td>asiakas</td><td>customers</td><td>-as → <span class="ending-highlight">-aa-t</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="groupN" class="plural-tab" style="display:none;">
+                            <h3>Group N — -nen → -set (common -nen pattern)</h3>
+                            <table style="width:100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="text-align:left; border-bottom:1px solid #ddd;"><th>Plural</th><th>Singular</th><th>Meaning</th><th>Rule</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>nai<span class="ending-highlight">set</span></strong></td><td>nainen</td><td>woman/women</td><td>-nen → <span class="ending-highlight">-set</span></td></tr>
+                                    <tr><td><strong>ihmis<span class="ending-highlight">et</span></strong></td><td>ihminen</td><td>person/people</td><td>-nen → <span class="ending-highlight">-et</span></td></tr>
+                                    <tr><td><strong>hevos<span class="ending-highlight">et</span></strong></td><td>hevonen</td><td>horse(s)</td><td>-nen → <span class="ending-highlight">-et</span></td></tr>
+                                    <tr><td><strong>lintu<span class="ending-highlight">set</span></strong></td><td>lintunen</td><td>little birds</td><td>-nen → <span class="ending-highlight">-set</span></td></tr>
+                                    <tr><td><strong>opettajai<span class="ending-highlight">set</span></strong></td><td>opettajainen</td><td>teachers (playful/formal)</td><td>-ainen → <span class="ending-highlight">-aiset</span></td></tr>
+                                    <tr><td><strong>kyläläi<span class="ending-highlight">set</span></strong></td><td>kyläläinen</td><td>villagers</td><td>-lainen → <span class="ending-highlight">-laiset</span></td></tr>
+                                    <tr><td><strong>ystäväi<span class="ending-highlight">set</span></strong></td><td>ystäväinen</td><td>dear friends (poetic)</td><td>-inen → <span class="ending-highlight">-iset</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Group 4 removed; entries redistributed to other groups (group1/group2/group3/groupN) to avoid duplicates -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const vocabulary = [
+            // Living room (22 words)
+            { finnish: 'sohva', syllables: ['soh', 'va'], english: 'sofa', icon: '🛋️', category: 'living-room' },
+            { finnish: 'televisio', syllables: ['te', 'le', 'vi', 'si', 'o'], english: 'television', icon: '📺', category: 'living-room' },
+            { finnish: 'tuoli', syllables: ['tuo', 'li'], english: 'chair', icon: '🪑', category: 'living-room' },
+            { finnish: 'pöytä', syllables: ['pöy', 'tä'], english: 'table', icon: '🪑', category: 'living-room' },
+            { finnish: 'lamppu', syllables: ['lamp', 'pu'], english: 'lamp', icon: '💡', category: 'living-room' },
+            { finnish: 'verho', syllables: ['ver', 'ho'], english: 'curtain', icon: '🪟', category: 'living-room' },
+            { finnish: 'matto', syllables: ['mat', 'to'], english: 'rug', icon: '🧩', category: 'living-room' },
+            { finnish: 'tyyny', syllables: ['tyy', 'ny'], english: 'pillow', icon: '🛏️', category: 'living-room' },
+            { finnish: 'hylly', syllables: ['hyl', 'ly'], english: 'shelf', icon: '📚', category: 'living-room' },
+            { finnish: 'ikkuna', syllables: ['ik', 'ku', 'na'], english: 'window', icon: '🪟', category: 'living-room' },
+            { finnish: 'ovi', syllables: ['o', 'vi'], english: 'door', icon: '🚪', category: 'living-room' },
+            { finnish: 'seinä', syllables: ['sei', 'nä'], english: 'wall', icon: '🧱', category: 'living-room' },
+            { finnish: 'katto', syllables: ['kat', 'to'], english: 'ceiling', icon: '⬜', category: 'living-room' },
+            { finnish: 'lattia', syllables: ['lat', 'ti', 'a'], english: 'floor', icon: '⬛', category: 'living-room' },
+            { finnish: 'nojatuoli', syllables: ['no', 'ja', 'tuo', 'li'], english: 'armchair', icon: '🪑', category: 'living-room' },
+            { finnish: 'kuva', syllables: ['ku', 'va'], english: 'picture', icon: '🖼️', category: 'living-room' },
+            { finnish: 'peili', syllables: ['pei', 'li'], english: 'mirror', icon: '🪞', category: 'living-room' },
+            { finnish: 'kasvi', syllables: ['kas', 'vi'], english: 'plant', icon: '🪴', category: 'living-room' },
+            { finnish: 'kello', syllables: ['kel', 'lo'], english: 'clock', icon: '🕐', category: 'living-room' },
+            { finnish: 'kirja', syllables: ['kir', 'ja'], english: 'book', icon: '📖', category: 'living-room' },
+            { finnish: 'radio', syllables: ['ra', 'di', 'o'], english: 'radio', icon: '📻', category: 'living-room' },
+            { finnish: 'kaappi', syllables: ['kaap', 'pi'], english: 'cabinet', icon: '🗄️', category: 'living-room' },
+            
+            // Kitchen (23 words)
+            { finnish: 'liesi', syllables: ['lie', 'si'], english: 'stove', icon: '🍳', category: 'kitchen' },
+            { finnish: 'uuni', syllables: ['uu', 'ni'], english: 'oven', icon: '🔥', category: 'kitchen' },
+            { finnish: 'jääkaappi', syllables: ['jää', 'kaap', 'pi'], english: 'refrigerator', icon: '🧊', category: 'kitchen' },
+            { finnish: 'allas', syllables: ['al', 'las'], english: 'sink', icon: '🚰', category: 'kitchen' },
+            { finnish: 'pata', syllables: ['pa', 'ta'], english: 'pot', icon: '🍲', category: 'kitchen' },
+            { finnish: 'pannu', syllables: ['pan', 'nu'], english: 'pan', icon: '🍳', category: 'kitchen' },
+            { finnish: 'kattila', syllables: ['kat', 'ti', 'la'], english: 'kettle', icon: '🫖', category: 'kitchen' },
+            { finnish: 'kulho', syllables: ['kul', 'ho'], english: 'bowl', icon: '🥣', category: 'kitchen' },
+            { finnish: 'lautanen', syllables: ['lau', 'ta', 'nen'], english: 'plate', icon: '🍽️', category: 'kitchen' },
+            { finnish: 'kuppi', syllables: ['kup', 'pi'], english: 'cup', icon: '☕', category: 'kitchen' },
+            { finnish: 'lasi', syllables: ['la', 'si'], english: 'glass', icon: '🥛', category: 'kitchen' },
+            { finnish: 'lusikka', syllables: ['lu', 'sik', 'ka'], english: 'spoon', icon: '🥄', category: 'kitchen' },
+            { finnish: 'haarukka', syllables: ['haa', 'ruk', 'ka'], english: 'fork', icon: '🍴', category: 'kitchen' },
+            { finnish: 'veitsi', syllables: ['veit', 'si'], english: 'knife', icon: '🔪', category: 'kitchen' },
+            { finnish: 'mikro', syllables: ['mik', 'ro'], english: 'microwave', icon: '📦', category: 'kitchen' },
+            { finnish: 'kahvinkeitin', syllables: ['kah', 'vin', 'kei', 'tin'], english: 'coffee maker', icon: '☕', category: 'kitchen' },
+            { finnish: 'leivänpaahdin', syllables: ['lei', 'vän', 'paah', 'tin'], english: 'toaster', icon: '🍞', category: 'kitchen' },
+            { finnish: 'astianpesukone', syllables: ['as', 'tian', 'pe', 'su', 'ko', 'ne'], english: 'dishwasher', icon: '🧽', category: 'kitchen' },
+            { finnish: 'jääkaapin', syllables: ['jää', 'kaa', 'pin'], english: 'freezer', icon: '❄️', category: 'kitchen' },
+            { finnish: 'leikkuulauta', syllables: ['leik', 'kuu', 'lau', 'ta'], english: 'cutting board', icon: '🔪', category: 'kitchen' },
+            { finnish: 'pyyhkeet', syllables: ['pyyhke', 'et'], english: 'towels', icon: '🧻', category: 'kitchen' },
+            { finnish: 'laatikko', syllables: ['laa', 'tik', 'ko'], english: 'drawer', icon: '🗄️', category: 'kitchen' },
+            { finnish: 'ruokapöytä', syllables: ['ruo', 'ka', 'pöy', 'tä'], english: 'dining table', icon: '🍽️', category: 'kitchen' },
+            
+            // Bathroom (12 words)
+            { finnish: 'suihku', syllables: ['suih', 'ku'], english: 'shower', icon: '🚿', category: 'bathroom' },
+            { finnish: 'kylpyamme', syllables: ['kyl', 'py', 'am', 'me'], english: 'bathtub', icon: '🛁', category: 'bathroom' },
+            { finnish: 'wc', syllables: ['wc'], english: 'toilet', icon: '🚽', category: 'bathroom' },
+            { finnish: 'pesuallas', syllables: ['pe', 'su', 'al', 'las'], english: 'sink', icon: '🚰', category: 'bathroom' },
+            { finnish: 'saippua', syllables: ['saip', 'pu', 'a'], english: 'soap', icon: '🧼', category: 'bathroom' },
+            { finnish: 'shampoo', syllables: ['sham', 'poo'], english: 'shampoo', icon: '🧴', category: 'bathroom' },
+            { finnish: 'pyyhe', syllables: ['pyy', 'he'], english: 'towel', icon: '🧻', category: 'bathroom' },
+            { finnish: 'hammasharja', syllables: ['ham', 'mas', 'har', 'ja'], english: 'toothbrush', icon: '🪥', category: 'bathroom' },
+            { finnish: 'hammastahna', syllables: ['ham', 'mas', 'tah', 'na'], english: 'toothpaste', icon: '🦷', category: 'bathroom' },
+            { finnish: 'hiustenkuivaaja', syllables: ['hius', 'ten', 'kui', 'vaa', 'ja'], english: 'hair dryer', icon: '💨', category: 'bathroom' },
+            { finnish: 'kampa', syllables: ['kam', 'pa'], english: 'comb', icon: '💇', category: 'bathroom' },
+            { finnish: 'harja', syllables: ['har', 'ja'], english: 'brush', icon: '🪮', category: 'bathroom' },
+            
+            // Bedroom (10 words)
+            { finnish: 'sänky', syllables: ['sän', 'ky'], english: 'bed', icon: '🛏️', category: 'bedroom' },
+            { finnish: 'patja', syllables: ['pat', 'ja'], english: 'mattress', icon: '🛏️', category: 'bedroom' },
+            { finnish: 'lakana', syllables: ['la', 'ka', 'na'], english: 'sheet', icon: '🛏️', category: 'bedroom' },
+            { finnish: 'peitto', syllables: ['peit', 'to'], english: 'blanket', icon: '🛏️', category: 'bedroom' },
+            { finnish: 'tyynyliina', syllables: ['tyy', 'ny', 'lii', 'na'], english: 'pillowcase', icon: '🛏️', category: 'bedroom' },
+            { finnish: 'vaatekaappi', syllables: ['vaa', 'te', 'kaap', 'pi'], english: 'wardrobe', icon: '👔', category: 'bedroom' },
+            { finnish: 'yöpöytä', syllables: ['yö', 'pöy', 'tä'], english: 'nightstand', icon: '🕯️', category: 'bedroom' },
+            { finnish: 'herätyskello', syllables: ['he', 'rä', 'tys', 'kel', 'lo'], english: 'alarm clock', icon: '⏰', category: 'bedroom' },
+            { finnish: 'lipasto', syllables: ['li', 'pas', 'to'], english: 'dresser', icon: '🗄️', category: 'bedroom' },
+            { finnish: 'peilipöytä', syllables: ['pei', 'li', 'pöy', 'tä'], english: 'vanity', icon: '🪞', category: 'bedroom' },
+            
+            // School (12 words)
+            { finnish: 'pulpetti', syllables: ['pul', 'pet', 'ti'], english: 'desk', icon: '🪑', category: 'school' },
+            { finnish: 'liitutaulu', syllables: ['lii', 'tu', 'tau', 'lu'], english: 'blackboard', icon: '🖤', category: 'school' },
+            { finnish: 'vihko', syllables: ['vih', 'ko'], english: 'notebook', icon: '📓', category: 'school' },
+            { finnish: 'kynä', syllables: ['ky', 'nä'], english: 'pen', icon: '✒️', category: 'school' },
+            { finnish: 'lyijykynä', syllables: ['lyi', 'jy', 'ky', 'nä'], english: 'pencil', icon: '✏️', category: 'school' },
+            { finnish: 'pyyhekumi', syllables: ['pyy', 'he', 'ku', 'mi'], english: 'eraser', icon: '🧽', category: 'school' },
+            { finnish: 'viivain', syllables: ['vii', 'vain'], english: 'ruler', icon: '📏', category: 'school' },
+            { finnish: 'reppu', syllables: ['rep', 'pu'], english: 'backpack', icon: '🎒', category: 'school' },
+            { finnish: 'oppikirja', syllables: ['op', 'pi', 'kir', 'ja'], english: 'textbook', icon: '📚', category: 'school' },
+            { finnish: 'tietokone', syllables: ['tie', 'to', 'ko', 'ne'], english: 'computer', icon: '💻', category: 'school' },
+            { finnish: 'kartta', syllables: ['kart', 'ta'], english: 'map', icon: '🗺️', category: 'school' },
+            { finnish: 'sakset', syllables: ['sak', 'set'], english: 'scissors', icon: '✂️', category: 'school' },
+            
+            // Restaurant (12 words)
+            { finnish: 'menu', syllables: ['me', 'nu'], english: 'menu', icon: '📋', category: 'restaurant' },
+            { finnish: 'tarjoilija', syllables: ['tar', 'joi', 'li', 'ja'], english: 'waiter', icon: '🧑‍🍳', category: 'restaurant' },
+            { finnish: 'ruoka', syllables: ['ruo', 'ka'], english: 'food', icon: '🍽️', category: 'restaurant' },
+            { finnish: 'juoma', syllables: ['juo', 'ma'], english: 'drink', icon: '🥤', category: 'restaurant' },
+            { finnish: 'annos', syllables: ['an', 'nos'], english: 'serving', icon: '🍛', category: 'restaurant' },
+            { finnish: 'alkuruoka', syllables: ['al', 'ku', 'ruo', 'ka'], english: 'appetizer', icon: '🥗', category: 'restaurant' },
+            { finnish: 'pääruoka', syllables: ['pää', 'ruo', 'ka'], english: 'main course', icon: '🍖', category: 'restaurant' },
+            { finnish: 'jälkiruoka', syllables: ['jäl', 'ki', 'ruo', 'ka'], english: 'dessert', icon: '🍰', category: 'restaurant' },
+            { finnish: 'lasku', syllables: ['las', 'ku'], english: 'bill', icon: '🧾', category: 'restaurant' },
+            { finnish: 'juomavesi', syllables: ['juo', 'ma', 've', 'si'], english: 'water', icon: '💧', category: 'restaurant' },
+            { finnish: 'lautasliina', syllables: ['lau', 'tas', 'lii', 'na'], english: 'napkin', icon: '🧻', category: 'restaurant' },
+            { finnish: 'varaus', syllables: ['va', 'raus'], english: 'reservation', icon: '📅', category: 'restaurant' },
+            
+            // Airport (12 words)
+            { finnish: 'lentokenttä', syllables: ['len', 'to', 'kent', 'tä'], english: 'airport', icon: '✈️', category: 'airport' },
+            { finnish: 'lento', syllables: ['len', 'to'], english: 'flight', icon: '✈️', category: 'airport' },
+            { finnish: 'lähtöselvitys', syllables: ['läh', 'tö', 'sel', 'vi', 'tys'], english: 'check-in', icon: '🎫', category: 'airport' },
+            { finnish: 'lippu', syllables: ['lip', 'pu'], english: 'ticket', icon: '🎫', category: 'airport' },
+            { finnish: 'passi', syllables: ['pas', 'si'], english: 'passport', icon: '📘', category: 'airport' },
+            { finnish: 'matkalaukku', syllables: ['mat', 'ka', 'lauk', 'ku'], english: 'suitcase', icon: '🧳', category: 'airport' },
+            { finnish: 'turvatarkastus', syllables: ['tur', 'va', 'tar', 'kas', 'tus'], english: 'security check', icon: '🔒', category: 'airport' },
+            { finnish: 'lähtöportti', syllables: ['läh', 'tö', 'port', 'ti'], english: 'gate', icon: '🚪', category: 'airport' },
+            { finnish: 'matkustaja', syllables: ['mat', 'kus', 'ta', 'ja'], english: 'passenger', icon: '🧑', category: 'airport' },
+            { finnish: 'laukkunauha', syllables: ['lauk', 'ku', 'nau', 'ha'], english: 'baggage claim', icon: '🎒', category: 'airport' },
+            { finnish: 'käsimatkatavara', syllables: ['kä', 'si', 'mat', 'ka', 'ta', 'va', 'ra'], english: 'carry-on', icon: '👜', category: 'airport' },
+            { finnish: 'tulli', syllables: ['tul', 'li'], english: 'customs', icon: '🛃', category: 'airport' }
+        ];
+
+        // --- Generate 'plurals' category entries from existing vocabulary ---
+        (function addPluralsCategory() {
+            const targetCats = ['living-room', 'kitchen', 'bathroom', 'bedroom', 'school', 'restaurant', 'airport'];
+
+            // Common irregulars / nicer plural forms for a handful of items
+            const exceptions = {
+                'pöytä': 'pöydät',
+                'annos': 'annokset',
+                'sänky': 'sängyt',
+                'pesuallas': 'pesualtaat',
+                'liesi': 'lieset',
+                'leivänpaahdin': 'leivänpaahtimet',
+                'kahvinkeitin': 'kahvinkeittimet',
+                'astianpesukone': 'astianpesukoneet',
+                'jääkaappi': 'jääkaapit',
+                'pyyhe': 'pyyhkeet',
+                'lakana': 'lakanat'
+            };
+
+            function basicPlural(fi) {
+                // A conservative, general rule: if word already ends with 't' assume plural; otherwise append 't'.
+                if (/t$/.test(fi)) return fi;
+                return fi + 't';
+            }
+
+            function englishPlural(en) {
+                // Very simple English pluraliser for display only
+                if (/s$|x$|z$|ch$|sh$/i.test(en)) return en + 'es';
+                if (/y$/i.test(en) && !/[aeiou]y$/i.test(en)) return en.replace(/y$/i, 'ies');
+                return en + 's';
+            }
+
+            const toAdd = [];
+            vocabulary.forEach(item => {
+                if (targetCats.includes(item.category)) {
+                    const base = item.finnish;
+                    const pluralFi = exceptions[base] || basicPlural(base);
+                    // Avoid adding duplicates if plural already exists in list
+                    const exists = vocabulary.some(v => v.finnish === pluralFi && v.category === 'plurals');
+                    if (!exists) {
+                        toAdd.push({
+                            finnish: pluralFi,
+                            syllables: [pluralFi],
+                            english: englishPlural(item.english),
+                            icon: item.icon,
+                            category: 'plurals'
+                        });
+                    }
+                }
+            });
+
+            // Append generated plurals to vocabulary array
+            toAdd.forEach(p => vocabulary.push(p));
+        })();
+
+        let selectedCategory = null;
+        let activeVocabulary = [];
+        let learningTrials = [];
+        let testTrials = [];
+        let currentTrial = 0;
+        let responses = [];
+        let currentTestItem = null;
+        let syllableSpeed = 500; // milliseconds between syllables
+        let syllableTimeout = null; // for clearing timeouts
+        let isRepeating = false; // track if user manually repeating
+        let spellingTrials = [];
+        let spellingResponses = [];
+        let currentSpellingWord = null;
+        let hintUsed = false;
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function shuffle(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function initApp() {
+            const categories = ['living-room', 'kitchen', 'bathroom', 'bedroom', 'school', 'restaurant', 'airport', 'plurals'];
+            categories.forEach(cat => {
+                const count = vocabulary.filter(v => v.category === cat).length;
+                const countEl = document.getElementById(`count-${cat}`);
+                if (countEl) {
+                    countEl.textContent = `${count} words`;
+                }
+            });
+        }
+
+        function selectCategory(category) {
+            selectedCategory = category;
+            activeVocabulary = vocabulary.filter(v => v.category === category);
+            
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.closest('.category-btn').classList.add('selected');
+
+            // If the special plural-rules category is chosen, open the rules screen
+            if (category === 'plural-rules') {
+                showScreen('pluralRulesScreen');
+                return;
+            }
+
+            showPreview();
+        }
+
+        function showPreview() {
+            const preview = document.getElementById('vocabPreview');
+            preview.innerHTML = '';
+            
+            activeVocabulary.forEach(word => {
+                const card = document.createElement('div');
+                card.className = 'vocab-card';
+                card.innerHTML = `
+                    <div class="vocab-icon">${word.icon}</div>
+                    <div class="vocab-finnish">${word.finnish}</div>
+                    <div class="vocab-english">${word.english}</div>
+                `;
+                preview.appendChild(card);
+            });
+            
+            showScreen('previewScreen');
+        }
+
+        function backToCategories() {
+            // stop any ongoing pronunciation or syllable timers
+            try { if (syllableTimeout) clearTimeout(syllableTimeout); } catch (e) {}
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+            showScreen('categoryScreen');
+        }
+
+        function startLearning() {
+            learningTrials = shuffle([...activeVocabulary]);
+            currentTrial = 0;
+            showScreen('learningScreen');
+            showLearningWord();
+        }
+
+        function showLearningWord() {
+            if (currentTrial >= learningTrials.length) {
+                showScreen('testInstructionsScreen');
+                document.getElementById('testIntroText').textContent = "You've completed the learning phase! Now let's test your knowledge.";
+                return;
+            }
+
+            const word = learningTrials[currentTrial];
+            
+            // Set up display - start empty for syllables
+            document.getElementById('finnishWord').textContent = '';
+            document.getElementById('englishWord').textContent = word.english;
+            document.getElementById('wordIcon').textContent = word.icon;
+            
+            document.getElementById('learningProgress').textContent = 
+                `Word ${currentTrial + 1} of ${learningTrials.length}`;
+            
+            // Display syllables one by one
+            displaySyllablesSequentially(word);
+        }
+
+        function displaySyllablesSequentially(word) {
+            let currentIndex = 0;
+
+            function showNextSyllable() {
+                if (currentIndex < word.syllables.length) {
+                    // Display current syllable
+                    document.getElementById('finnishWord').textContent = word.syllables[currentIndex];
+                    
+                    currentIndex++;
+                    syllableTimeout = setTimeout(showNextSyllable, syllableSpeed);
+                } else {
+                    // All syllables shown, show full word and pronounce
+                    setTimeout(() => {
+                        document.getElementById('finnishWord').textContent = word.finnish;
+                        pronounceWord(word.finnish);
+                        
+                        // Automatically move to next word after pronunciation + pause
+                        if (!isRepeating) {
+                            syllableTimeout = setTimeout(() => {
+                                nextLearningWord();
+                            }, syllableSpeed + 1500); // Extra pause after pronunciation
+                        }
+                    }, 500);
+                }
+            }
+
+            showNextSyllable();
+        }
+
+        function pronounceWord(word) {
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'fi-FI'; // Finnish
+                utterance.rate = 0.8; // Slightly slower for learning
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function updateSpeed() {
+            syllableSpeed = parseInt(document.getElementById('speedSelect').value);
+        }
+
+        function nextLearningWord() {
+            // Clear any ongoing syllable animation
+            if (syllableTimeout) {
+                clearTimeout(syllableTimeout);
+            }
+            window.speechSynthesis.cancel();
+            isRepeating = false;
+            
+            currentTrial++;
+            showLearningWord();
+        }
+
+        function repeatWord() {
+            // Set flag to prevent auto-advance
+            isRepeating = true;
+            
+            // Clear any ongoing animation
+            if (syllableTimeout) {
+                clearTimeout(syllableTimeout);
+            }
+            window.speechSynthesis.cancel();
+            
+            // Get current word and restart display
+            const word = learningTrials[currentTrial];
+            
+            // Reset display
+            document.getElementById('finnishWord').textContent = '';
+            
+            // Restart syllable sequence
+            displaySyllablesSequentially(word);
+            
+            // Reset flag after display completes
+            setTimeout(() => {
+                isRepeating = false;
+            }, (word.syllables.length * syllableSpeed) + 2500);
+        }
+
+        function skipToTest() {
+            if (!activeVocabulary || activeVocabulary.length === 0) {
+                alert('Please select a vocabulary category first!');
+                return;
+            }
+            
+            document.getElementById('testIntroText').textContent = 
+                "You've chosen to test your existing knowledge without the learning phase.";
+            showScreen('testInstructionsScreen');
+        }
+
+        function skipToTestFromLearning() {
+            document.getElementById('testIntroText').textContent = 
+                "You've chosen to skip the rest of the learning phase.";
+            showScreen('testInstructionsScreen');
+        }
+
+        function backToPreview() {
+            // stop any ongoing pronunciation or syllable timers
+            try { if (syllableTimeout) clearTimeout(syllableTimeout); } catch (e) {}
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+            showScreen('previewScreen');
+        }
+
+        function startTest() {
+            testTrials = shuffle([...activeVocabulary]);
+            currentTrial = 0;
+            responses = [];
+            showScreen('testScreen');
+            showTestQuestion();
+        }
+
+        function showTestQuestion() {
+            if (currentTrial >= testTrials.length) {
+                showResults();
+                return;
+            }
+
+            const correct = testTrials[currentTrial];
+            currentTestItem = correct;
+            
+            const otherWords = activeVocabulary.filter(w => w.finnish !== correct.finnish);
+            const wrongAnswers = shuffle(otherWords).slice(0, 3);
+            const allOptions = shuffle([correct, ...wrongAnswers]);
+            
+            document.getElementById('questionCounter').textContent = 
+                `Question ${currentTrial + 1} of ${testTrials.length}`;
+            document.getElementById('testIcon').textContent = correct.icon;
+            document.getElementById('testEnglish').textContent = correct.english;
+            
+            const optionsDiv = document.getElementById('answerOptions');
+            optionsDiv.innerHTML = '';
+            
+            allOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = option.finnish;
+                btn.onclick = () => checkAnswer(option.finnish, correct.finnish);
+                optionsDiv.appendChild(btn);
+            });
+            
+            document.getElementById('testProgress').textContent = 
+                `Progress: ${currentTrial}/${testTrials.length}`;
+        }
+
+        function checkAnswer(selected, correct) {
+            const isCorrect = selected === correct;
+            responses.push({
+                word: currentTestItem,
+                correct: isCorrect,
+                selected: selected
+            });
+            
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === correct) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent === selected && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            setTimeout(() => {
+                currentTrial++;
+                showTestQuestion();
+            }, 1500);
+        }
+
+        function showResults() {
+            const correctCount = responses.filter(r => r.correct).length;
+            const total = responses.length;
+            const percentage = Math.round((correctCount / total) * 100);
+            
+            document.getElementById('finalScore').textContent = `${percentage}%`;
+            
+            const tableDiv = document.getElementById('resultsTable');
+            tableDiv.innerHTML = `
+                <div class="result-row">
+                    <strong>Total Questions:</strong>
+                    <span>${total}</span>
+                </div>
+                <div class="result-row">
+                    <strong>Correct:</strong>
+                    <span style="color: #28a745;">${correctCount}</span>
+                </div>
+                <div class="result-row">
+                    <strong>Incorrect:</strong>
+                    <span style="color: #dc3545;">${total - correctCount}</span>
+                </div>
+                <div class="result-row">
+                    <strong>Accuracy:</strong>
+                    <span>${percentage}%</span>
+                </div>
+            `;
+            
+            showScreen('resultsScreen');
+        }
+
+        function restartApp() {
+            console.log('restartApp() starting...'); // Debug
+            selectedCategory = null;
+            activeVocabulary = [];
+            spellingTrials = [];
+            spellingResponses = [];
+            console.log('Variables reset, showing category screen...'); // Debug
+            try { if (syllableTimeout) clearTimeout(syllableTimeout); } catch (e) {}
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+            showScreen('categoryScreen');
+            console.log('Category screen should now be visible'); // Debug
+        }
+
+        function retakeTest() {
+            // Check if we're retaking spelling test or category test
+            if (spellingTrials.length > 0 && spellingTrials.length === vocabulary.length) {
+                startSpellingTest();
+            } else {
+                startTest();
+            }
+        }
+
+        function exitSpellingTest() {
+            console.log('EXIT BUTTON CLICKED!'); // Debug
+            console.log('About to call restartApp()'); // Debug
+            restartApp();
+            console.log('restartApp() completed'); // Debug
+        }
+
+        function startSpellingTest() {
+            // Use all vocabulary from all categories
+            spellingTrials = shuffle([...vocabulary]);
+            spellingResponses = [];
+            currentTrial = 0;
+            showScreen('spellingTestScreen');
+            showSpellingQuestion();
+        }
+
+        function showSpellingQuestion() {
+            if (currentTrial >= spellingTrials.length) {
+                showSpellingResults();
+                return;
+            }
+
+            currentSpellingWord = spellingTrials[currentTrial];
+            hintUsed = false;
+            
+            document.getElementById('spellingCounter').textContent = 
+                `Question ${currentTrial + 1} of ${spellingTrials.length}`;
+            document.getElementById('spellingIcon').textContent = currentSpellingWord.icon;
+            document.getElementById('spellingEnglish').textContent = currentSpellingWord.english;
+            
+            // Reset input and feedback
+            document.getElementById('spellingInput').value = '';
+            document.getElementById('spellingInput').disabled = false;
+            document.getElementById('spellingInput').style.borderColor = '#667eea';
+            document.getElementById('spellingFeedback').textContent = '';
+            document.getElementById('spellingFeedback').style.color = '';
+            document.getElementById('hintDisplay').style.display = 'none';
+            document.getElementById('hintDisplay').textContent = '';
+            document.getElementById('submitSpellingBtn').disabled = false;
+            document.getElementById('hintBtn').disabled = false;
+            
+            document.getElementById('spellingProgress').textContent = 
+                `Progress: ${currentTrial}/${spellingTrials.length}`;
+            
+            // Focus on input
+            document.getElementById('spellingInput').focus();
+        }
+
+        function handleSpellingEnter(event) {
+            if (event.key === 'Enter') {
+                submitSpelling();
+            }
+        }
+
+        function submitSpelling() {
+            const userAnswer = document.getElementById('spellingInput').value.trim().toLowerCase();
+            const correctAnswer = currentSpellingWord.finnish.toLowerCase();
+            
+            if (!userAnswer) {
+                document.getElementById('spellingFeedback').textContent = 'Please type an answer!';
+                document.getElementById('spellingFeedback').style.color = '#dc3545';
+                return;
+            }
+            
+            const isCorrect = userAnswer === correctAnswer;
+            
+            spellingResponses.push({
+                word: currentSpellingWord,
+                correct: isCorrect,
+                userAnswer: document.getElementById('spellingInput').value.trim(),
+                hintUsed: hintUsed
+            });
+            
+            // Show feedback
+            const feedbackEl = document.getElementById('spellingFeedback');
+            const inputEl = document.getElementById('spellingInput');
+            
+            if (isCorrect) {
+                feedbackEl.textContent = '✓ Correct!';
+                feedbackEl.style.color = '#28a745';
+                inputEl.style.borderColor = '#28a745';
+            } else {
+                feedbackEl.textContent = `✗ Incorrect. The correct answer is: ${currentSpellingWord.finnish}`;
+                feedbackEl.style.color = '#dc3545';
+                inputEl.style.borderColor = '#dc3545';
+            }
+            
+            // Disable input and buttons
+            inputEl.disabled = true;
+            document.getElementById('submitSpellingBtn').disabled = true;
+            document.getElementById('hintBtn').disabled = true;
+            
+            // Move to next question after delay
+            setTimeout(() => {
+                currentTrial++;
+                showSpellingQuestion();
+            }, 2500);
+        }
+
+        function showHint() {
+            hintUsed = true;
+            const hintDisplay = document.getElementById('hintDisplay');
+            hintDisplay.textContent = `Hint: ${currentSpellingWord.finnish}`;
+            hintDisplay.style.display = 'block';
+            document.getElementById('hintBtn').disabled = true;
+        }
+
+        function showSpellingResults() {
+            const correctCount = spellingResponses.filter(r => r.correct).length;
+            const total = spellingResponses.length;
+            const percentage = Math.round((correctCount / total) * 100);
+            const hintsUsed = spellingResponses.filter(r => r.hintUsed).length;
+            
+            document.getElementById('finalScore').textContent = `${percentage}%`;
+            
+            const tableDiv = document.getElementById('resultsTable');
+            tableDiv.innerHTML = `
+                <div class="result-row">
+                    <strong>Total Questions:</strong>
+                    <span>${total}</span>
+                </div>
+                <div class="result-row">
+                    <strong>Correct:</strong>
+                    <span style="color: #28a745;">${correctCount}</span>
+                </div>
+                <div class="result-row">
+                    <strong>Incorrect:</strong>
+                    <span style="color: #dc3545;">${total - correctCount}</span>
+                </div>
+                <div class="result-row">
+                    <strong>Hints Used:</strong>
+                    <span style="color: #ffc107;">${hintsUsed}</span>
+                </div>
+                <div class="result-row">
+                    <strong>Accuracy:</strong>
+                    <span>${percentage}%</span>
+                </div>
+            `;
+            
+            showScreen('resultsScreen');
+        }
+
+        function exitLearning() {
+            if (syllableTimeout) {
+                clearTimeout(syllableTimeout);
+            }
+            window.speechSynthesis.cancel();
+            
+            if (confirm('Are you sure you want to exit the learning phase?')) {
+                showScreen('previewScreen');
+            }
+        }
+
+        function exitToCategories() {
+            if (confirm('Are you sure you want to go back to category selection?')) {
+                restartApp();
+            }
+        }
+
+        function exitTest() {
+            if (confirm('Are you sure you want to exit the test? Your progress will be lost.')) {
+                showScreen('previewScreen');
+            }
+        }
+
+        // --- Compatibility: expose functions and add fallback handler for .exit-btn ---
+        // Ensure the functions are available on window (for inline onclick attributes)
+        try {
+            if (typeof exitLearning === 'function') window.exitLearning = exitLearning;
+        } catch (e) { console.warn('exitLearning not defined at bind time'); }
+        try {
+            if (typeof exitToCategories === 'function') window.exitToCategories = exitToCategories;
+        } catch (e) { console.warn('exitToCategories not defined at bind time'); }
+        try {
+            if (typeof exitTest === 'function') window.exitTest = exitTest;
+        } catch (e) { console.warn('exitTest not defined at bind time'); }
+
+        // Fallback: if an element with class .exit-btn is clicked and no handler runs,
+        // handle it here. This uses event delegation and will work even if inline onclick fails.
+        document.addEventListener('click', (ev) => {
+            const btn = ev.target.closest && ev.target.closest('.exit-btn');
+            if (!btn) return;
+
+            // Add a small debug log
+            console.log('exit-btn clicked (delegated handler)');
+
+            // If an inline onclick already executed, do nothing extra.
+            // Otherwise call a sensible fallback depending on which screen is active.
+            // Determine which exit function is appropriate by data-action or current screen.
+            const action = btn.getAttribute('data-action') || btn.getAttribute('data-exit') || '';
+            if (action === 'to-categories' && typeof window.exitToCategories === 'function') {
+                window.exitToCategories();
+                return;
+            }
+            if (action === 'exit-test' && typeof window.exitTest === 'function') {
+                window.exitTest();
+                return;
+            }
+
+            // If the page has exitLearning defined, prefer that
+            if (typeof window.exitLearning === 'function') {
+                window.exitLearning();
+                return;
+            }
+
+            // Generic fallback: show preview screen or call restartApp
+            if (confirm('Exit? Are you sure you want to leave this screen?')) {
+                const preview = document.getElementById('previewScreen');
+                if (preview) {
+                    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                    preview.classList.add('active');
+                    return;
+                }
+                if (typeof window.restartApp === 'function') {
+                    window.restartApp();
+                    return;
+                }
+                window.history.back();
+            }
+        });
+
+        initApp();
+
+        // Plural rules tab handler
+        function showPluralTab(id) {
+            document.querySelectorAll('.plural-tab').forEach(el => el.style.display = 'none');
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'block';
+        }
+
+        // Show first tab by default when the screen is opened
+        document.addEventListener('DOMContentLoaded', () => {
+            showPluralTab('group1');
+        });
+
+        // --- Dynamic Plural Rules Renderer ---
+        const pluralRulesData = {
+            'group1': {
+                title: "Group 1 — new -i → +t / vowel + -t",
+                rows: [
+                    {sing: 'peili', plur: 'peilit', meaning: 'mirrors', rule: 'new -i → + t', diff: 't'},
+                    {sing: 'kasvi', plur: 'kasvit', meaning: 'plants', rule: 'new -i → + t', diff: 't'},
+                    {sing: 'passi', plur: 'passit', meaning: 'passports', rule: 'new -i → + t', diff: 't'},
+                    {sing: 'tiski', plur: 'tiskit', meaning: 'counters', rule: 'new -i → + t', diff: 't'},
+                    {sing: 'käsi', plur: 'kädet', meaning: 'hand(s)', rule: 'internal vowel/stem change', diff: 'et'},
+                    {sing: 'reisi', plur: 'reidet', meaning: 'thigh(s)', rule: 'internal stem change', diff: 'et'},
+                    {sing: 'vuosi', plur: 'vuodet', meaning: 'year(s)', rule: 'stem alternation', diff: 'det'},
+                    {sing: 'vesi', plur: 'vedet', meaning: 'water(s)', rule: 'stem alternation', diff: 'det'},
+                    {sing: 'susi', plur: 'sudet', meaning: 'wolf/wolves', rule: 'regular plural -t', diff: 't'},
+                    {sing: 'kuukausi', plur: 'kuukaudet', meaning: 'month(s)', rule: 'compound/stem change', diff: 'det'},
+                    {sing: 'toveri', plur: 'toverit', meaning: 'friend(s)', rule: 'loan-type -i exception', diff: 't'}
+                ]
+            },
+            'group2': {
+                title: "Group 2 — -e → -et",
+                rows: [
+                    {sing: 'pyyhe', plur: 'pyyhkeet', meaning: 'towels', rule: '-e → -et', diff: 'et'},
+                    {sing: 'tuote', plur: 'tuotteet', meaning: 'products', rule: '-e → -et', diff: 'et'},
+                    {sing: 'lentokone', plur: 'lentokoneet', meaning: 'airplanes', rule: '-e → -et', diff: 'et'},
+                    {sing: 'tietokone', plur: 'tietokoneet', meaning: 'computers', rule: '-e → -et', diff: 'et'}
+                ]
+            },
+            'group3': {
+                title: "Group 3 — -as → -aa-t / other stem changes",
+                rows: [
+                    {sing: 'hammas', plur: 'hampaat', meaning: 'teeth', rule: '-as → -aa-t', diff: 'aat'},
+                    {sing: 'asiakas', plur: 'asiakkaat', meaning: 'customers', rule: '-as → -aa-t', diff: 'at'}
+                ]
+            },
+            'groupN': {
+                title: "Group N — -nen → -set (common -nen pattern)",
+                rows: [
+                    {sing: 'nainen', plur: 'naiset', meaning: 'woman/women', rule: '-nen → -set', diff: 'set'},
+                    {sing: 'ihminen', plur: 'ihmiset', meaning: 'person/people', rule: '-nen → -set', diff: 'set'},
+                    {sing: 'hevonen', plur: 'hevoset', meaning: 'horse(s)', rule: '-nen → -set', diff: 'set'},
+                    {sing: 'lintunen', plur: 'lintuset', meaning: 'little birds', rule: '-nen → -set', diff: 'set'},
+                    {sing: 'opettajainen', plur: 'opettajaiset', meaning: 'teachers (playful/formal)', rule: '-ainen → -aiset', diff: 'set'},
+                    {sing: 'kyläläinen', plur: 'kyläläiset', meaning: 'villagers', rule: '-lainen → -laiset', diff: 'set'},
+                    {sing: 'ystäväinen', plur: 'ystäväiset', meaning: 'dear friends (poetic)', rule: '-inen → -iset', diff: 'set'}
+                ]
+            }
+        };
+
+        function highlightDiff(plural, diff) {
+            // If diff is at the end of plural, split and wrap suffix
+            if (plural.endsWith(diff)) {
+                const base = plural.slice(0, plural.length - diff.length);
+                return `${base}<span class="ending-highlight">${diff}</span>`;
+            }
+            // Fallback: highlight last characters equal to diff length
+            const base = plural.slice(0, plural.length - diff.length);
+            const suffix = plural.slice(plural.length - diff.length);
+            return `${base}<span class="ending-highlight">${suffix}</span>`;
+        }
+
+        function renderPluralRules() {
+            const container = document.getElementById('pluralContent');
+            container.innerHTML = '';
+
+            Object.keys(pluralRulesData).forEach(groupId => {
+                const group = pluralRulesData[groupId];
+                const pane = document.createElement('div');
+                pane.id = groupId;
+                pane.className = 'plural-tab';
+                pane.style.display = 'none';
+
+                const h3 = document.createElement('h3');
+                h3.textContent = group.title;
+                pane.appendChild(h3);
+
+                const table = document.createElement('table');
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+
+                const thead = document.createElement('thead');
+                thead.innerHTML = `<tr style="text-align:left; border-bottom:1px solid #ddd;"><th>Plural</th><th>Singular</th><th>Meaning</th><th>Rule</th></tr>`;
+                table.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+                group.rows.forEach(r => {
+                    const tr = document.createElement('tr');
+                    const pluralHtml = `<strong>${highlightDiff(r.plur, r.diff)}</strong>`;
+                    tr.innerHTML = `<td>${pluralHtml}</td><td>${r.sing}</td><td>${r.meaning}</td><td>${r.rule.replace(r.diff, `<span class=\"ending-highlight\">${r.diff}</span>`)}</td>`;
+                    tbody.appendChild(tr);
+                });
+
+                table.appendChild(tbody);
+                pane.appendChild(table);
+                container.appendChild(pane);
+            });
+
+            // Rebind showPluralTab to ensure newly created panes work
+            showPluralTab('group1');
+        }
+
+        // Render on script load and when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPluralRules();
+        });
+
+        // ------------------ Sentence Builder Logic (Where is/are ...) ------------------
+    let currentSentence = null;
+    let sentenceTrials = [];
+    let currentSentenceIndex = 0;
+
+        function pickRandomVocabForSentence() {
+            // choose a random vocab item from activeVocabulary if present, otherwise from full list
+            const pool = (activeVocabulary && activeVocabulary.length > 0) ? activeVocabulary : vocabulary;
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
+        function buildSentenceTrials() {
+            const pool = (activeVocabulary && activeVocabulary.length > 0) ? activeVocabulary : vocabulary;
+            sentenceTrials = pool.map(item => ({ item }));
+            currentSentenceIndex = 0;
+        }
+
+        function startSentenceBuilder(index = 0) {
+            if (!sentenceTrials || sentenceTrials.length === 0) buildSentenceTrials();
+            currentSentenceIndex = index;
+            loadSentenceTrial(currentSentenceIndex);
+            showScreen('sentenceScreen');
+            attachDropHandlers();
+        }
+
+        function loadSentenceTrial(idx) {
+            if (!sentenceTrials || sentenceTrials.length === 0) {
+                buildSentenceTrials();
+            }
+            if (idx < 0) idx = 0;
+            if (idx >= sentenceTrials.length) idx = sentenceTrials.length - 1;
+            currentSentenceIndex = idx;
+            const item = sentenceTrials[currentSentenceIndex].item;
+
+            const english = item.english;
+            const phrase = (english.endsWith('s') ? 'Where are the ' : 'Where is the ') + english + '?';
+            const pronoun = english.endsWith('s') ? 'ne' : 'se';
+            const target = ['Missä', pronoun, item.finnish, '?'];
+
+            currentSentence = {
+                englishPrompt: phrase,
+                finnish: target,
+                distractors: getDistractors(item)
+            };
+
+            document.getElementById('sentenceEnglish').textContent = 'Make this sentence in Finnish: ' + currentSentence.englishPrompt;
+            document.getElementById('sentenceProgress').textContent = `Word ${currentSentenceIndex + 1} of ${sentenceTrials.length}`;
+            document.getElementById('sentenceHint').style.display = 'none';
+            populateWordPool();
+            document.getElementById('sentenceDrop').innerHTML = '';
+        }
+
+        function nextSentence() {
+            if (currentSentenceIndex < sentenceTrials.length - 1) {
+                loadSentenceTrial(currentSentenceIndex + 1);
+            } else {
+                alert('You have finished this category.');
+            }
+        }
+
+        function getDistractors(item) {
+            // pick 3 random other finnish words from vocabulary as distractors
+            const others = vocabulary.filter(v => v.finnish !== item.finnish).map(v => v.finnish);
+            const shuffled = shuffle(others);
+            return shuffled.slice(0, 3);
+        }
+
+        function populateWordPool() {
+            const pool = document.getElementById('wordPool');
+            pool.innerHTML = '';
+
+            const baseWords = currentSentence.finnish.filter(w => w.trim() !== '');
+            const combined = [...baseWords, ...currentSentence.distractors];
+            const words = shuffle(combined);
+
+            words.forEach(word => {
+                const chip = document.createElement('div');
+                chip.className = 'word-chip';
+                chip.textContent = word;
+                chip.setAttribute('draggable', 'true');
+                chip.addEventListener('dragstart', onDragStart);
+                // click fallback: move chip to drop zone when clicked
+                chip.addEventListener('click', () => {
+                    const drop = document.getElementById('sentenceDrop');
+                    if (!drop) return;
+                    // create a new chip in drop zone
+                    const placed = document.createElement('div');
+                    placed.className = 'word-chip';
+                    placed.textContent = word;
+                    placed.addEventListener('click', () => {
+                        document.getElementById('wordPool').appendChild(placed);
+                    });
+                    drop.appendChild(placed);
+                    // remove this original from pool
+                    if (chip.parentNode) chip.parentNode.removeChild(chip);
+                });
+                pool.appendChild(chip);
+            });
+        }
+
+        function onDragStart(e) {
+            console.log('dragstart:', e.target.textContent);
+            try {
+                e.dataTransfer.setData('text/plain', e.target.textContent);
+            } catch (err) {
+                console.warn('setData failed', err);
+            }
+        }
+        // attach drop handlers when the sentence screen is shown
+        function attachDropHandlers() {
+            const dropZone = document.getElementById('sentenceDrop');
+            const pool = document.getElementById('wordPool');
+            if (!dropZone || !pool) return;
+
+            // remove previously attached listeners by cloning
+            const newDrop = dropZone.cloneNode(true);
+            dropZone.parentNode.replaceChild(newDrop, dropZone);
+
+            newDrop.addEventListener('dragover', (e) => { e.preventDefault(); });
+            newDrop.addEventListener('drop', (e) => {
+                e.preventDefault();
+                console.log('drop event', e);
+                const text = e.dataTransfer.getData('text/plain');
+                if (!text) return;
+
+                const chip = document.createElement('div');
+                chip.className = 'word-chip';
+                chip.textContent = text;
+                chip.addEventListener('click', () => {
+                    document.getElementById('wordPool').appendChild(chip);
+                });
+                newDrop.appendChild(chip);
+
+                // remove original from pool (first matching)
+                const poolChips = Array.from(document.getElementById('wordPool').children);
+                const original = poolChips.find(c => c.textContent === text);
+                if (original) original.remove();
+            });
+        }
+
+        function normalizeSentenceParts(parts) {
+            return parts
+                .map(s => s.trim())
+                .filter(Boolean)
+                .join(' ')
+                .replace(/\s+\?/g, ' ?')
+                .toLowerCase()
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function showSentenceFeedback(message, ok = false) {
+            const hintEl = document.getElementById('sentenceHint');
+            hintEl.textContent = message;
+            hintEl.style.display = 'block';
+            hintEl.style.color = ok ? '#2e7d32' : '#c62828';
+        }
+
+        function checkSentence() {
+            try {
+                if (!currentSentence) {
+                    console.warn('checkSentence called but no currentSentence set');
+                    showSentenceFeedback('No sentence is active. Please start the Sentence Builder.', false);
+                    return;
+                }
+
+                const dropNode = document.getElementById('sentenceDrop');
+                if (!dropNode) {
+                    console.error('Drop zone not found');
+                    showSentenceFeedback('Internal error: drop zone not found', false);
+                    return;
+                }
+
+                const placed = Array.from(dropNode.children).map(n => n.textContent.trim());
+                const target = currentSentence.finnish.filter(w => w.trim() !== '');
+
+                const placedNorm = normalizeSentenceParts(placed);
+                const targetNorm = normalizeSentenceParts(target);
+
+                console.log('checkSentence: placed=', placedNorm, ' target=', targetNorm);
+
+                if (!placed.length) {
+                    showSentenceFeedback('Place the words to form the sentence, then check.', false);
+                    return;
+                }
+
+                if (placedNorm === targetNorm) {
+                    showSentenceFeedback('✅ Correct! Nice work.', true);
+                    // auto-advance after short delay
+                    setTimeout(() => {
+                        nextSentence();
+                    }, 900);
+                } else {
+                    showSentenceFeedback('✗ Not quite — try again.', false);
+                }
+            } catch (err) {
+                console.error('checkSentence error', err);
+                showSentenceFeedback('Error checking sentence. See console for details.', false);
+            }
+        }
+
+        function showHintSentence() {
+            const target = currentSentence.finnish.filter(w => w.trim() !== '');
+            document.getElementById('sentenceHint').textContent = 'Correct sentence: ' + target.join(' ');
+            document.getElementById('sentenceHint').style.display = 'block';
+        }
+
+        function shufflePool() {
+            populateWordPool();
+        }
+    </script>
+</body>
+</html>
