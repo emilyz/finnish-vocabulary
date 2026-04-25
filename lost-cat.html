@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kadonnut kissa — The Lost Cat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-stone-100 min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="env,react">
+    const { useReducer } = React;
+
+    // -------------------------------------------------------------------
+    // 2. ROOMS — hand-authored case forms (no runtime morphology)
+    // -------------------------------------------------------------------
+    const ROOMS = {
+      kitchen:    { name: 'keittiö',    emoji: '🍳', inessive: 'keittiössä',     elative: 'keittiöstä',     illative: 'keittiöön'      },
+      hallway:    { name: 'eteinen',    emoji: '🚪', inessive: 'eteisessä',      elative: 'eteisestä',      illative: 'eteiseen'       },
+      bedroom:    { name: 'makuuhuone', emoji: '🛏️', inessive: 'makuuhuoneessa', elative: 'makuuhuoneesta', illative: 'makuuhuoneeseen'},
+      bathroom:   { name: 'kylpyhuone', emoji: '🛁', inessive: 'kylpyhuoneessa', elative: 'kylpyhuoneesta', illative: 'kylpyhuoneeseen'},
+      livingroom: { name: 'olohuone',   emoji: '🛋️', inessive: 'olohuoneessa',   elative: 'olohuoneesta',   illative: 'olohuoneeseen'  },
+      garden:     { name: 'puutarha',   emoji: '🌿', inessive: 'puutarhassa',    elative: 'puutarhasta',    illative: 'puutarhaan'     },
+    };
+
+    // 3x2 grid order
+    const GRID_ORDER = ['kitchen', 'hallway', 'bedroom', 'bathroom', 'livingroom', 'garden'];
+
+    // -------------------------------------------------------------------
+    // 3. ADJACENCY
+    // -------------------------------------------------------------------
+    const ADJACENCY = {
+      kitchen:    ['hallway', 'bathroom'],
+      hallway:    ['kitchen', 'bedroom', 'livingroom'],
+      bedroom:    ['hallway', 'garden'],
+      bathroom:   ['kitchen', 'livingroom'],
+      livingroom: ['hallway', 'bathroom', 'garden'],
+      garden:     ['bedroom', 'livingroom'],
+    };
+
+    const areAdjacent = (a, b) => ADJACENCY[a]?.includes(b) ?? false;
+    const caseForm = (roomKey, kase) => ROOMS[roomKey][kase];
+
+    // -------------------------------------------------------------------
+    // 4. Witness utterance templates
+    // -------------------------------------------------------------------
+    const VERBS = {
+      inessive: ['Misu on', 'Näin Misun', 'Misu nukkuu'],
+      elative:  ['Misu juoksi', 'Misu tuli', 'Misu hyppäsi'],
+      illative: ['Misu meni', 'Misu juoksi', 'Misu piiloutui'],
+    };
+
+    const pickVerb = (kase, seed) => {
+      const list = VERBS[kase];
+      return list[seed % list.length];
+    };
+
+    const buildClue = (kase, roomKey, seed = 0) => ({
+      case: kase,
+      roomKey,
+      text: `${pickVerb(kase, seed)} ${caseForm(roomKey, kase)}.`,
+    });
+
+    // -------------------------------------------------------------------
+    // 5. LEVEL DATA
+    //
+    // Each level is a directed plan: a sequence of clue beats. Each beat
+    // names a case + room. The resolver advances trajectoryIndex when the
+    // player makes a beat-consistent click; the cat is "found" when the
+    // last beat's room is clicked under an inessive or illative clue.
+    // -------------------------------------------------------------------
+    const LEVELS = [
+      {
+        id: 1,
+        title: 'Taso 1',
+        intro: 'Rouva Virtanen näki Misun juuri äsken.',
+        turnBudget: 4,
+        beats: [
+          { case: 'inessive', room: 'bathroom', verbSeed: 2 }, // "Misu nukkuu kylpyhuoneessa."
+        ],
+      },
+      {
+        id: 2,
+        title: 'Taso 2',
+        intro: 'Rouva Virtanen kuuli juoksuaskeleita.',
+        turnBudget: 5,
+        beats: [
+          { case: 'elative',  room: 'kitchen', verbSeed: 0 }, // "Misu juoksi keittiöstä."
+          { case: 'illative', room: 'hallway', verbSeed: 0 }, // pawprint then: "Misu meni eteiseen."
+        ],
+      },
+      {
+        id: 3,
+        title: 'Taso 3',
+        intro: 'Rouva Virtanen seurasi Misua olohuoneeseen asti.',
+        turnBudget: 5,
+        beats: [
+          { case: 'elative',  room: 'livingroom', verbSeed: 0 }, // "Misu juoksi olohuoneesta."
+          { case: 'illative', room: 'garden',     verbSeed: 0 }, // "Misu meni puutarhaan."
+        ],
+      },
+      {
+        id: 4,
+        title: 'Taso 4',
+        intro: 'Pitkä takaa-ajo — kolme käännöstä.',
+        turnBudget: 6,
+        beats: [
+          { case: 'elative',  room: 'kitchen',    verbSeed: 0 }, // ran from kitchen
+          { case: 'illative', room: 'livingroom', verbSeed: 0 }, // went to livingroom
+          { case: 'inessive', room: 'garden',     verbSeed: 2 }, // is sleeping in garden
+        ],
+      },
+      {
+        id: 5,
+        title: 'Taso 5',
+        intro: 'Vihje on epäselvä — sitouduthan tulkintaasi.',
+        turnBudget: 6,
+        beats: [
+          { case: 'elative',  room: 'hallway',    verbSeed: 0 }, // ran from hallway (3 adjacents)
+          { case: 'illative', room: 'livingroom', verbSeed: 1 }, // went to livingroom (adjacent: hallway, bathroom, garden)
+          { case: 'inessive', room: 'garden',     verbSeed: 0 }, // is in garden
+        ],
+      },
+    ];
+
+    // -------------------------------------------------------------------
+    // 6. Reducer / resolver
+    //
+    // The resolver implements the spatial-semantic logic of section 7.
+    // -------------------------------------------------------------------
+    function buildBeatClue(beat) {
+      return buildClue(beat.case, beat.room, beat.verbSeed ?? 0);
+    }
+
+    function initialStateForLevel(levelIndex) {
+      const level = LEVELS[levelIndex];
+      const firstBeat = level.beats[0];
+      const lastBeat = level.beats[level.beats.length - 1];
+      const firstClue = buildBeatClue(firstBeat);
+      return {
+        levelIndex,
+        turnsRemaining: level.turnBudget,
+        catLocation: lastBeat.room,
+        beatIndex: 0,
+        currentClue: firstClue,
+        witnessLine: firstClue.text,
+        history: [
+          { type: 'intro', text: level.intro },
+          { type: 'clue',  text: firstClue.text },
+        ],
+        status: 'playing',
+        visitedRooms: [],
+        celebration: null,
+      };
+    }
+
+    function reducer(state, action) {
+      switch (action.type) {
+        case 'click_room':
+          return resolveClick(state, action.roomKey);
+        case 'next_level': {
+          const next = state.levelIndex + 1;
+          if (next >= LEVELS.length) {
+            return { ...state, status: 'campaign_complete' };
+          }
+          return initialStateForLevel(next);
+        }
+        case 'restart_level':
+          return initialStateForLevel(state.levelIndex);
+        case 'restart_campaign':
+          return initialStateForLevel(0);
+        default:
+          return state;
+      }
+    }
+
+    // The heart of the game.
+    function resolveClick(state, clickedRoom) {
+      if (state.status !== 'playing') return state;
+
+      const level = LEVELS[state.levelIndex];
+      const clue = state.currentClue;
+      const beat = level.beats[state.beatIndex];
+      const isLastBeat = state.beatIndex === level.beats.length - 1;
+      const nextBeat = isLastBeat ? null : level.beats[state.beatIndex + 1];
+
+      const history = [...state.history, { type: 'click', text: clickRoomLine(clickedRoom) }];
+      let visited = state.visitedRooms.includes(clickedRoom)
+        ? state.visitedRooms
+        : [...state.visitedRooms, clickedRoom];
+
+      // ----- INESSIVE clue: cat is in clue.roomKey -----
+      if (clue.case === 'inessive') {
+        if (clickedRoom === clue.roomKey) {
+          return finish(state, history, visited, [
+            { type: 'witness', text: 'Sinä löysit Misun! 🐈' },
+          ]);
+        }
+        // Wrong room — contrast: clicked-room inessive (negative) vs. target inessive (positive).
+        const witness = `Ei, Misu ei ole ${caseForm(clickedRoom, 'inessive')}. Misu on ${caseForm(clue.roomKey, 'inessive')}.`;
+        return spendTurn(state, history, visited, witness);
+      }
+
+      // ----- ELATIVE clue: cat WAS in clue.roomKey, has left -----
+      if (clue.case === 'elative') {
+        if (clickedRoom === clue.roomKey) {
+          // Same room — contrast inessive negative + restate elative.
+          const witness = `Ei, Misu ei ole enää ${caseForm(clue.roomKey, 'inessive')}. ${pickVerb('elative', beat.verbSeed ?? 0)} ${caseForm(clue.roomKey, 'elative')}.`;
+          return spendTurn(state, history, visited, witness);
+        }
+        if (areAdjacent(clue.roomKey, clickedRoom)) {
+          // Pawprint — turn preserved. Witness advances with the next beat.
+          if (!nextBeat) {
+            return finish(state, history, visited, [
+              { type: 'witness', text: 'Tassunjäljet päättyvät tähän. Misu on löytynyt! 🐈' },
+            ]);
+          }
+          const nextClue = buildBeatClue(nextBeat);
+          const witness = `Hyvä! Tässä on tassunjälki. ${nextClue.text}`;
+          return advanceBeat(state, history, visited, witness, nextClue);
+        }
+        // Non-adjacent — empty inessive on clicked room + restate elative.
+        const witness = `Ei, Misu ei ollut ${caseForm(clickedRoom, 'inessive')}. ${pickVerb('elative', beat.verbSeed ?? 0)} ${caseForm(clue.roomKey, 'elative')}.`;
+        return spendTurn(state, history, visited, witness);
+      }
+
+      // ----- ILLATIVE clue: cat went into clue.roomKey -----
+      if (clue.case === 'illative') {
+        if (clickedRoom === clue.roomKey) {
+          if (isLastBeat) {
+            return finish(state, history, visited, [
+              { type: 'witness', text: 'Tässä on tassunjälki… ja tässä on Misu! 🐈' },
+            ]);
+          }
+          const nextClue = buildBeatClue(nextBeat);
+          const witness = `Tässä on tassunjälki. ${nextClue.text}`;
+          return advanceBeat(state, history, visited, witness, nextClue);
+        }
+        // Wrong room — empty inessive on clicked room + restate illative.
+        const witness = `Ei, Misu ei ole ${caseForm(clickedRoom, 'inessive')}. ${pickVerb('illative', beat.verbSeed ?? 0)} ${caseForm(clue.roomKey, 'illative')}.`;
+        return spendTurn(state, history, visited, witness);
+      }
+
+      return state;
+    }
+
+    function clickRoomLine(roomKey) {
+      // Player action recorded as a Finnish illative-style log entry — no English.
+      return `▸ Sinä menit ${caseForm(roomKey, 'illative')}.`;
+    }
+
+    function spendTurn(state, history, visited, witnessText) {
+      const newHistory = [...history, { type: 'witness', text: witnessText }];
+      const turns = state.turnsRemaining - 1;
+      if (turns <= 0) {
+        const failLine = 'Voi ei… Misu karkasi naapurin pihalle.';
+        return {
+          ...state,
+          turnsRemaining: 0,
+          witnessLine: failLine,
+          history: [...newHistory, { type: 'witness', text: failLine }],
+          visitedRooms: visited,
+          status: 'lost',
+        };
+      }
+      return {
+        ...state,
+        turnsRemaining: turns,
+        witnessLine: witnessText,
+        history: newHistory,
+        visitedRooms: visited,
+      };
+    }
+
+    function advanceBeat(state, history, visited, witnessText, nextClue) {
+      // Pawprint progress — no turn spent.
+      const newHistory = [
+        ...history,
+        { type: 'witness', text: witnessText },
+        { type: 'clue',    text: nextClue.text },
+      ];
+      return {
+        ...state,
+        beatIndex: state.beatIndex + 1,
+        currentClue: nextClue,
+        witnessLine: witnessText,
+        history: newHistory,
+        visitedRooms: visited,
+      };
+    }
+
+    function finish(state, history, visited, extraEntries) {
+      const newHistory = [...history, ...extraEntries];
+      const lastWitness = extraEntries[extraEntries.length - 1]?.text ?? state.witnessLine;
+      // Replay all narrative beats (intro, clues, witness lines) in order.
+      const clueReplay = newHistory.filter(
+        h => h.type === 'intro' || h.type === 'clue' || h.type === 'witness'
+      );
+      return {
+        ...state,
+        history: newHistory,
+        witnessLine: lastWitness,
+        visitedRooms: visited,
+        status: 'won',
+        celebration: { replay: clueReplay },
+      };
+    }
+
+    // -------------------------------------------------------------------
+    // 7. Subcomponents
+    // -------------------------------------------------------------------
+    function TurnIndicator({ remaining, total }) {
+      const dots = [];
+      for (let i = 0; i < total; i++) {
+        const filled = i < remaining;
+        dots.push(
+          <span
+            key={i}
+            className={
+              'inline-block w-3 h-3 rounded-full mx-0.5 ' +
+              (filled ? 'bg-amber-500' : 'bg-stone-300 border border-stone-400')
+            }
+            aria-hidden="true"
+          />
+        );
+      }
+      return (
+        <div className="flex items-center" aria-label={`${remaining} of ${total} turns remaining`}>
+          {dots}
+        </div>
+      );
+    }
+
+    function RoomTile({ roomKey, onClick, disabled, highlighted, dimmed }) {
+      const room = ROOMS[roomKey];
+      const base =
+        'flex flex-col items-center justify-center rounded-2xl border-2 p-4 h-32 transition-all select-none ';
+      const interactive = disabled
+        ? 'cursor-not-allowed opacity-60 '
+        : 'cursor-pointer hover:border-amber-500 hover:bg-amber-50 hover:-translate-y-0.5 ';
+      const tone = highlighted
+        ? 'bg-amber-100 border-amber-500 '
+        : dimmed
+          ? 'bg-stone-50 border-stone-200 '
+          : 'bg-white border-stone-300 ';
+      return (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => onClick(roomKey)}
+          className={base + interactive + tone}
+        >
+          <span className="text-4xl mb-1" aria-hidden="true">{room.emoji}</span>
+          <span className="text-sm font-medium text-stone-700">{room.name}</span>
+        </button>
+      );
+    }
+
+    function ApartmentGrid({ onRoomClick, disabled, highlightRoom, foundRoom }) {
+      return (
+        <div className="grid grid-cols-3 gap-3">
+          {GRID_ORDER.map(key => (
+            <RoomTile
+              key={key}
+              roomKey={key}
+              onClick={onRoomClick}
+              disabled={disabled}
+              highlighted={key === foundRoom}
+              dimmed={highlightRoom && key !== highlightRoom}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    function WitnessPanel({ line }) {
+      // The witness "speaks" the most recent Finnish utterance. No glosses.
+      return (
+        <div className="bg-white rounded-2xl border-2 border-stone-300 p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="text-4xl" aria-hidden="true">👵</div>
+            <div className="flex-1">
+              <div className="text-xs uppercase tracking-wider text-stone-500 mb-1">
+                Rouva Virtanen
+              </div>
+              <p className="text-lg font-medium text-stone-900 leading-snug">
+                "{line}"
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function HistoryLog({ entries }) {
+      return (
+        <div className="bg-stone-50 rounded-2xl border border-stone-200 p-3 max-h-72 overflow-y-auto">
+          <div className="text-xs uppercase tracking-wider text-stone-500 mb-2">Tapahtumat</div>
+          <ul className="space-y-1.5 text-sm">
+            {entries.map((e, i) => {
+              const tone =
+                e.type === 'click'   ? 'text-stone-600 italic' :
+                e.type === 'clue'    ? 'text-stone-900' :
+                e.type === 'witness' ? 'text-stone-900' :
+                                       'text-stone-500';
+              return (
+                <li key={i} className={tone}>{e.text}</li>
+              );
+            })}
+          </ul>
+        </div>
+      );
+    }
+
+    function VictoryOverlay({ state, dispatch }) {
+      const level = LEVELS[state.levelIndex];
+      const isLast = state.levelIndex === LEVELS.length - 1;
+      return (
+        <div className="absolute inset-0 bg-stone-900/70 flex items-center justify-center rounded-3xl p-6 z-10">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-xl">
+            <div className="text-center mb-4">
+              <div className="text-5xl mb-2">🐈</div>
+              <h2 className="text-2xl font-bold text-stone-900">Löysit Misun!</h2>
+              <p className="text-sm text-stone-500 mt-1">{level.title} valmis</p>
+            </div>
+            <div className="bg-stone-50 rounded-xl p-3 mb-4 max-h-60 overflow-y-auto">
+              <div className="text-xs uppercase tracking-wider text-stone-500 mb-2">
+                Tarinan kulku
+              </div>
+              <ul className="space-y-1.5 text-sm text-stone-800">
+                {state.celebration.replay.map((e, i) => (
+                  <li key={i}>{e.text}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => dispatch({ type: 'restart_level' })}
+                className="px-4 py-2 rounded-lg border border-stone-300 text-stone-700 hover:bg-stone-100"
+              >
+                Pelaa uudelleen
+              </button>
+              {isLast ? (
+                <button
+                  onClick={() => dispatch({ type: 'restart_campaign' })}
+                  className="px-4 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600"
+                >
+                  Aloita alusta
+                </button>
+              ) : (
+                <button
+                  onClick={() => dispatch({ type: 'next_level' })}
+                  className="px-4 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600"
+                >
+                  Seuraava taso →
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function FailureOverlay({ state, dispatch }) {
+      return (
+        <div className="absolute inset-0 bg-stone-900/70 flex items-center justify-center rounded-3xl p-6 z-10">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl text-center">
+            <div className="text-5xl mb-2">🌧️</div>
+            <h2 className="text-2xl font-bold text-stone-900 mb-1">Misu karkasi…</h2>
+            <p className="text-stone-600 mb-4">
+              Vuorot loppuivat. Yritetäänkö uudelleen?
+            </p>
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={() => dispatch({ type: 'restart_level' })}
+                className="px-4 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600"
+              >
+                Yritä uudelleen
+              </button>
+              <button
+                onClick={() => dispatch({ type: 'restart_campaign' })}
+                className="px-4 py-2 rounded-lg border border-stone-300 text-stone-700 hover:bg-stone-100"
+              >
+                Alusta
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function CampaignCompleteOverlay({ dispatch }) {
+      return (
+        <div className="absolute inset-0 bg-stone-900/70 flex items-center justify-center rounded-3xl p-6 z-10">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl text-center">
+            <div className="text-5xl mb-2">🏆</div>
+            <h2 className="text-2xl font-bold text-stone-900 mb-1">Kaikki tasot valmiit!</h2>
+            <p className="text-stone-600 mb-4">
+              Hienoa työtä, etsivä. Misu on aina löytynyt.
+            </p>
+            <button
+              onClick={() => dispatch({ type: 'restart_campaign' })}
+              className="px-4 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600"
+            >
+              Pelaa alusta
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // -------------------------------------------------------------------
+    // 8. Main game component
+    // -------------------------------------------------------------------
+    function LostCatGame() {
+      const [state, dispatch] = useReducer(reducer, 0, initialStateForLevel);
+      const level = LEVELS[state.levelIndex];
+
+      const onRoomClick = (roomKey) => dispatch({ type: 'click_room', roomKey });
+
+      const overlay =
+        state.status === 'won'                ? <VictoryOverlay state={state} dispatch={dispatch} /> :
+        state.status === 'lost'               ? <FailureOverlay state={state} dispatch={dispatch} /> :
+        state.status === 'campaign_complete'  ? <CampaignCompleteOverlay dispatch={dispatch} /> :
+                                                null;
+
+      return (
+        <div className="max-w-5xl mx-auto p-4 md:p-8">
+          <header className="flex items-end justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-stone-900">Kadonnut kissa</h1>
+              <p className="text-sm text-stone-500">{level.title} · Etsi Misu</p>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-xs uppercase tracking-wider text-stone-500 mb-1">Vuorot</span>
+              <TurnIndicator remaining={state.turnsRemaining} total={level.turnBudget} />
+            </div>
+          </header>
+
+          <div className="relative bg-white/60 rounded-3xl p-4 md:p-6 border border-stone-200 shadow-inner">
+            <div className="grid md:grid-cols-[1fr_320px] gap-4">
+              <div>
+                <ApartmentGrid
+                  onRoomClick={onRoomClick}
+                  disabled={state.status !== 'playing'}
+                  foundRoom={state.status === 'won' ? state.catLocation : null}
+                />
+              </div>
+              <div className="flex flex-col gap-3">
+                <WitnessPanel line={state.witnessLine} />
+                <HistoryLog entries={state.history} />
+              </div>
+            </div>
+            {overlay}
+          </div>
+
+          <footer className="mt-4 flex items-center justify-between text-xs text-stone-500">
+            <span>Klikkaa huonetta toimiaksesi vihjeen mukaan.</span>
+            <button
+              onClick={() => dispatch({ type: 'restart_level' })}
+              className="text-stone-600 hover:text-stone-900 underline"
+            >
+              Aloita taso alusta
+            </button>
+          </footer>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<LostCatGame />);
+  </script>
+</body>
+</html>
