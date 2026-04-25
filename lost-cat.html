@@ -16,22 +16,21 @@
     const { useReducer } = React;
 
     // -------------------------------------------------------------------
-    // 2. ROOMS — hand-authored case forms (no runtime morphology)
+    // ROOMS — hand-authored case forms (no runtime morphology)
     // -------------------------------------------------------------------
     const ROOMS = {
-      kitchen:    { name: 'keittiö',    emoji: '🍳', inessive: 'keittiössä',     elative: 'keittiöstä',     illative: 'keittiöön'      },
-      hallway:    { name: 'eteinen',    emoji: '🚪', inessive: 'eteisessä',      elative: 'eteisestä',      illative: 'eteiseen'       },
-      bedroom:    { name: 'makuuhuone', emoji: '🛏️', inessive: 'makuuhuoneessa', elative: 'makuuhuoneesta', illative: 'makuuhuoneeseen'},
-      bathroom:   { name: 'kylpyhuone', emoji: '🛁', inessive: 'kylpyhuoneessa', elative: 'kylpyhuoneesta', illative: 'kylpyhuoneeseen'},
-      livingroom: { name: 'olohuone',   emoji: '🛋️', inessive: 'olohuoneessa',   elative: 'olohuoneesta',   illative: 'olohuoneeseen'  },
-      garden:     { name: 'puutarha',   emoji: '🌿', inessive: 'puutarhassa',    elative: 'puutarhasta',    illative: 'puutarhaan'     },
+      kitchen:    { name: 'keittiö',    en: 'kitchen',     emoji: '🍳', inessive: 'keittiössä',     elative: 'keittiöstä',     illative: 'keittiöön'      },
+      hallway:    { name: 'eteinen',    en: 'entryway',    emoji: '🚪', inessive: 'eteisessä',      elative: 'eteisestä',      illative: 'eteiseen'       },
+      bedroom:    { name: 'makuuhuone', en: 'bedroom',     emoji: '🛏️', inessive: 'makuuhuoneessa', elative: 'makuuhuoneesta', illative: 'makuuhuoneeseen'},
+      bathroom:   { name: 'kylpyhuone', en: 'bathroom',    emoji: '🛁', inessive: 'kylpyhuoneessa', elative: 'kylpyhuoneesta', illative: 'kylpyhuoneeseen'},
+      livingroom: { name: 'olohuone',   en: 'living room', emoji: '🛋️', inessive: 'olohuoneessa',   elative: 'olohuoneesta',   illative: 'olohuoneeseen'  },
+      garden:     { name: 'puutarha',   en: 'garden',      emoji: '🌿', inessive: 'puutarhassa',    elative: 'puutarhasta',    illative: 'puutarhaan'     },
     };
 
-    // 3x2 grid order
     const GRID_ORDER = ['kitchen', 'hallway', 'bedroom', 'bathroom', 'livingroom', 'garden'];
 
     // -------------------------------------------------------------------
-    // 3. ADJACENCY
+    // ADJACENCY
     // -------------------------------------------------------------------
     const ADJACENCY = {
       kitchen:    ['hallway', 'bathroom'],
@@ -43,98 +42,108 @@
     };
 
     const areAdjacent = (a, b) => ADJACENCY[a]?.includes(b) ?? false;
-    const caseForm = (roomKey, kase) => ROOMS[roomKey][kase];
+    const fi = (roomKey, kase) => ROOMS[roomKey][kase];
+    const en = (roomKey) => ROOMS[roomKey].en;
 
     // -------------------------------------------------------------------
-    // 4. Witness utterance templates
+    // Witness verb templates — bilingual
     // -------------------------------------------------------------------
     const VERBS = {
-      inessive: ['Misu on', 'Näin Misun', 'Misu nukkuu'],
-      elative:  ['Misu juoksi', 'Misu tuli', 'Misu hyppäsi'],
-      illative: ['Misu meni', 'Misu juoksi', 'Misu piiloutui'],
+      inessive: [
+        { fi: 'Misu on',     en: 'Misu is in'           },
+        { fi: 'Näin Misun',  en: 'I saw Misu in'        },
+        { fi: 'Misu nukkuu', en: 'Misu is sleeping in'  },
+      ],
+      elative: [
+        { fi: 'Misu juoksi',  en: 'Misu ran from'    },
+        { fi: 'Misu tuli',    en: 'Misu came from'   },
+        { fi: 'Misu hyppäsi', en: 'Misu jumped from' },
+      ],
+      illative: [
+        { fi: 'Misu meni',      en: 'Misu went into'  },
+        { fi: 'Misu juoksi',    en: 'Misu ran into'   },
+        { fi: 'Misu piiloutui', en: 'Misu hid in'     },
+      ],
     };
 
-    const pickVerb = (kase, seed) => {
-      const list = VERBS[kase];
-      return list[seed % list.length];
-    };
+    const pickVerb = (kase, seed) => VERBS[kase][seed % VERBS[kase].length];
 
-    const buildClue = (kase, roomKey, seed = 0) => ({
-      case: kase,
-      roomKey,
-      text: `${pickVerb(kase, seed)} ${caseForm(roomKey, kase)}.`,
-    });
+    const buildClue = (kase, roomKey, seed = 0) => {
+      const v = pickVerb(kase, seed);
+      return {
+        case: kase,
+        roomKey,
+        fi: `${v.fi} ${fi(roomKey, kase)}.`,
+        en: `${v.en} the ${en(roomKey)}.`,
+      };
+    };
 
     // -------------------------------------------------------------------
-    // 5. LEVEL DATA
-    //
-    // Each level is a directed plan: a sequence of clue beats. Each beat
-    // names a case + room. The resolver advances trajectoryIndex when the
-    // player makes a beat-consistent click; the cat is "found" when the
-    // last beat's room is clicked under an inessive or illative clue.
+    // LEVEL DATA
     // -------------------------------------------------------------------
     const LEVELS = [
       {
         id: 1,
         title: 'Taso 1',
-        intro: 'Rouva Virtanen näki Misun juuri äsken.',
+        intro: { fi: 'Rouva Virtanen näki Misun juuri äsken.',
+                 en: 'Rouva Virtanen just saw Misu.' },
         turnBudget: 4,
         beats: [
-          { case: 'inessive', room: 'bathroom', verbSeed: 2 }, // "Misu nukkuu kylpyhuoneessa."
+          { case: 'inessive', room: 'bathroom', verbSeed: 2 },
         ],
       },
       {
         id: 2,
         title: 'Taso 2',
-        intro: 'Rouva Virtanen kuuli juoksuaskeleita.',
+        intro: { fi: 'Rouva Virtanen kuuli juoksuaskeleita.',
+                 en: 'Rouva Virtanen heard running footsteps.' },
         turnBudget: 5,
         beats: [
-          { case: 'elative',  room: 'kitchen', verbSeed: 0 }, // "Misu juoksi keittiöstä."
-          { case: 'illative', room: 'hallway', verbSeed: 0 }, // pawprint then: "Misu meni eteiseen."
+          { case: 'elative',  room: 'kitchen', verbSeed: 0 },
+          { case: 'illative', room: 'hallway', verbSeed: 0 },
         ],
       },
       {
         id: 3,
         title: 'Taso 3',
-        intro: 'Rouva Virtanen seurasi Misua olohuoneeseen asti.',
+        intro: { fi: 'Misu lähti olohuoneesta.',
+                 en: 'Misu took off from the living room.' },
         turnBudget: 5,
         beats: [
-          { case: 'elative',  room: 'livingroom', verbSeed: 0 }, // "Misu juoksi olohuoneesta."
-          { case: 'illative', room: 'garden',     verbSeed: 0 }, // "Misu meni puutarhaan."
+          { case: 'elative',  room: 'livingroom', verbSeed: 0 },
+          { case: 'illative', room: 'garden',     verbSeed: 0 },
         ],
       },
       {
         id: 4,
         title: 'Taso 4',
-        intro: 'Pitkä takaa-ajo — kolme käännöstä.',
+        intro: { fi: 'Pitkä takaa-ajo — kolme käännöstä.',
+                 en: 'A long chase — three turns.' },
         turnBudget: 6,
         beats: [
-          { case: 'elative',  room: 'kitchen',    verbSeed: 0 }, // ran from kitchen
-          { case: 'illative', room: 'livingroom', verbSeed: 0 }, // went to livingroom
-          { case: 'inessive', room: 'garden',     verbSeed: 2 }, // is sleeping in garden
+          { case: 'elative',  room: 'kitchen',    verbSeed: 0 },
+          { case: 'illative', room: 'livingroom', verbSeed: 0 },
+          { case: 'inessive', room: 'garden',     verbSeed: 2 },
         ],
       },
       {
         id: 5,
         title: 'Taso 5',
-        intro: 'Vihje on epäselvä — sitouduthan tulkintaasi.',
+        intro: { fi: 'Vihje on epäselvä — sitouduthan tulkintaasi.',
+                 en: 'The clue is unclear — commit to your interpretation.' },
         turnBudget: 6,
         beats: [
-          { case: 'elative',  room: 'hallway',    verbSeed: 0 }, // ran from hallway (3 adjacents)
-          { case: 'illative', room: 'livingroom', verbSeed: 1 }, // went to livingroom (adjacent: hallway, bathroom, garden)
-          { case: 'inessive', room: 'garden',     verbSeed: 0 }, // is in garden
+          { case: 'elative',  room: 'hallway',    verbSeed: 0 },
+          { case: 'illative', room: 'livingroom', verbSeed: 1 },
+          { case: 'inessive', room: 'garden',     verbSeed: 0 },
         ],
       },
     ];
 
     // -------------------------------------------------------------------
-    // 6. Reducer / resolver
-    //
-    // The resolver implements the spatial-semantic logic of section 7.
+    // Reducer / resolver
     // -------------------------------------------------------------------
-    function buildBeatClue(beat) {
-      return buildClue(beat.case, beat.room, beat.verbSeed ?? 0);
-    }
+    const buildBeatClue = beat => buildClue(beat.case, beat.room, beat.verbSeed ?? 0);
 
     function initialStateForLevel(levelIndex) {
       const level = LEVELS[levelIndex];
@@ -147,13 +156,12 @@
         catLocation: lastBeat.room,
         beatIndex: 0,
         currentClue: firstClue,
-        witnessLine: firstClue.text,
+        witnessLine: { fi: firstClue.fi, en: firstClue.en },
         history: [
-          { type: 'intro', text: level.intro },
-          { type: 'clue',  text: firstClue.text },
+          { type: 'intro', fi: level.intro.fi, en: level.intro.en },
+          { type: 'clue',  fi: firstClue.fi,   en: firstClue.en   },
         ],
         status: 'playing',
-        visitedRooms: [],
         celebration: null,
       };
     }
@@ -164,9 +172,7 @@
           return resolveClick(state, action.roomKey);
         case 'next_level': {
           const next = state.levelIndex + 1;
-          if (next >= LEVELS.length) {
-            return { ...state, status: 'campaign_complete' };
-          }
+          if (next >= LEVELS.length) return { ...state, status: 'campaign_complete' };
           return initialStateForLevel(next);
         }
         case 'restart_level':
@@ -178,7 +184,6 @@
       }
     }
 
-    // The heart of the game.
     function resolveClick(state, clickedRoom) {
       if (state.status !== 'playing') return state;
 
@@ -188,130 +193,138 @@
       const isLastBeat = state.beatIndex === level.beats.length - 1;
       const nextBeat = isLastBeat ? null : level.beats[state.beatIndex + 1];
 
-      const history = [...state.history, { type: 'click', text: clickRoomLine(clickedRoom) }];
-      let visited = state.visitedRooms.includes(clickedRoom)
-        ? state.visitedRooms
-        : [...state.visitedRooms, clickedRoom];
+      const history = [...state.history, {
+        type: 'click',
+        fi: `▸ Sinä menit ${fi(clickedRoom, 'illative')}.`,
+        en: `▸ You went into the ${en(clickedRoom)}.`,
+      }];
 
-      // ----- INESSIVE clue: cat is in clue.roomKey -----
+      // ----- INESSIVE: cat is in clue.roomKey -----
       if (clue.case === 'inessive') {
         if (clickedRoom === clue.roomKey) {
-          return finish(state, history, visited, [
-            { type: 'witness', text: 'Sinä löysit Misun! 🐈' },
-          ]);
+          return finish(state, history, [{
+            type: 'witness',
+            fi: 'Sinä löysit Misun! 🐈',
+            en: 'You found Misu! 🐈',
+          }]);
         }
-        // Wrong room — contrast: clicked-room inessive (negative) vs. target inessive (positive).
-        const witness = `Ei, Misu ei ole ${caseForm(clickedRoom, 'inessive')}. Misu on ${caseForm(clue.roomKey, 'inessive')}.`;
-        return spendTurn(state, history, visited, witness);
+        return spendTurn(state, history, {
+          fi: `Ei, Misu ei ole ${fi(clickedRoom, 'inessive')}. Misu on ${fi(clue.roomKey, 'inessive')}.`,
+          en: `No, Misu isn't in the ${en(clickedRoom)}. Misu is in the ${en(clue.roomKey)}.`,
+        });
       }
 
-      // ----- ELATIVE clue: cat WAS in clue.roomKey, has left -----
+      // ----- ELATIVE: cat WAS in clue.roomKey, has left -----
       if (clue.case === 'elative') {
+        const v = pickVerb('elative', beat.verbSeed ?? 0);
         if (clickedRoom === clue.roomKey) {
-          // Same room — contrast inessive negative + restate elative.
-          const witness = `Ei, Misu ei ole enää ${caseForm(clue.roomKey, 'inessive')}. ${pickVerb('elative', beat.verbSeed ?? 0)} ${caseForm(clue.roomKey, 'elative')}.`;
-          return spendTurn(state, history, visited, witness);
+          return spendTurn(state, history, {
+            fi: `Ei, Misu ei ole enää ${fi(clue.roomKey, 'inessive')}. ${v.fi} ${fi(clue.roomKey, 'elative')}.`,
+            en: `No, Misu isn't in the ${en(clue.roomKey)} anymore. ${v.en} the ${en(clue.roomKey)}.`,
+          });
         }
         if (areAdjacent(clue.roomKey, clickedRoom)) {
-          // Pawprint — turn preserved. Witness advances with the next beat.
           if (!nextBeat) {
-            return finish(state, history, visited, [
-              { type: 'witness', text: 'Tassunjäljet päättyvät tähän. Misu on löytynyt! 🐈' },
-            ]);
+            return finish(state, history, [{
+              type: 'witness',
+              fi: 'Tassunjäljet päättyvät tähän. Misu on löytynyt! 🐈',
+              en: 'The paw prints end here. Misu has been found! 🐈',
+            }]);
           }
           const nextClue = buildBeatClue(nextBeat);
-          const witness = `Hyvä! Tässä on tassunjälki. ${nextClue.text}`;
-          return advanceBeat(state, history, visited, witness, nextClue);
+          return advanceBeat(state, history, {
+            fi: `Hyvä! Tässä on tassunjälki. ${nextClue.fi}`,
+            en: `Good! Here's a paw print. ${nextClue.en}`,
+          }, nextClue);
         }
-        // Non-adjacent — empty inessive on clicked room + restate elative.
-        const witness = `Ei, Misu ei ollut ${caseForm(clickedRoom, 'inessive')}. ${pickVerb('elative', beat.verbSeed ?? 0)} ${caseForm(clue.roomKey, 'elative')}.`;
-        return spendTurn(state, history, visited, witness);
+        return spendTurn(state, history, {
+          fi: `Ei, Misu ei ollut ${fi(clickedRoom, 'inessive')}. ${v.fi} ${fi(clue.roomKey, 'elative')}.`,
+          en: `No, Misu wasn't in the ${en(clickedRoom)}. ${v.en} the ${en(clue.roomKey)}.`,
+        });
       }
 
-      // ----- ILLATIVE clue: cat went into clue.roomKey -----
+      // ----- ILLATIVE: cat went into clue.roomKey -----
       if (clue.case === 'illative') {
+        const v = pickVerb('illative', beat.verbSeed ?? 0);
         if (clickedRoom === clue.roomKey) {
           if (isLastBeat) {
-            return finish(state, history, visited, [
-              { type: 'witness', text: 'Tässä on tassunjälki… ja tässä on Misu! 🐈' },
-            ]);
+            return finish(state, history, [{
+              type: 'witness',
+              fi: 'Tässä on tassunjälki… ja tässä on Misu! 🐈',
+              en: "Here's a paw print… and here's Misu! 🐈",
+            }]);
           }
           const nextClue = buildBeatClue(nextBeat);
-          const witness = `Tässä on tassunjälki. ${nextClue.text}`;
-          return advanceBeat(state, history, visited, witness, nextClue);
+          return advanceBeat(state, history, {
+            fi: `Tässä on tassunjälki. ${nextClue.fi}`,
+            en: `Here's a paw print. ${nextClue.en}`,
+          }, nextClue);
         }
-        // Wrong room — empty inessive on clicked room + restate illative.
-        const witness = `Ei, Misu ei ole ${caseForm(clickedRoom, 'inessive')}. ${pickVerb('illative', beat.verbSeed ?? 0)} ${caseForm(clue.roomKey, 'illative')}.`;
-        return spendTurn(state, history, visited, witness);
+        return spendTurn(state, history, {
+          fi: `Ei, Misu ei ole ${fi(clickedRoom, 'inessive')}. ${v.fi} ${fi(clue.roomKey, 'illative')}.`,
+          en: `No, Misu isn't in the ${en(clickedRoom)}. ${v.en} the ${en(clue.roomKey)}.`,
+        });
       }
 
       return state;
     }
 
-    function clickRoomLine(roomKey) {
-      // Player action recorded as a Finnish illative-style log entry — no English.
-      return `▸ Sinä menit ${caseForm(roomKey, 'illative')}.`;
-    }
-
-    function spendTurn(state, history, visited, witnessText) {
-      const newHistory = [...history, { type: 'witness', text: witnessText }];
+    function spendTurn(state, history, witnessLine) {
+      const newHistory = [...history, { type: 'witness', ...witnessLine }];
       const turns = state.turnsRemaining - 1;
       if (turns <= 0) {
-        const failLine = 'Voi ei… Misu karkasi naapurin pihalle.';
+        const failLine = {
+          fi: 'Voi ei… Misu karkasi naapurin pihalle.',
+          en: "Oh no… Misu escaped to the neighbour's yard.",
+        };
         return {
           ...state,
           turnsRemaining: 0,
           witnessLine: failLine,
-          history: [...newHistory, { type: 'witness', text: failLine }],
-          visitedRooms: visited,
+          history: [...newHistory, { type: 'witness', ...failLine }],
           status: 'lost',
         };
       }
       return {
         ...state,
         turnsRemaining: turns,
-        witnessLine: witnessText,
+        witnessLine,
         history: newHistory,
-        visitedRooms: visited,
       };
     }
 
-    function advanceBeat(state, history, visited, witnessText, nextClue) {
-      // Pawprint progress — no turn spent.
+    function advanceBeat(state, history, witnessLine, nextClue) {
       const newHistory = [
         ...history,
-        { type: 'witness', text: witnessText },
-        { type: 'clue',    text: nextClue.text },
+        { type: 'witness', ...witnessLine },
+        { type: 'clue',    fi: nextClue.fi, en: nextClue.en },
       ];
       return {
         ...state,
         beatIndex: state.beatIndex + 1,
         currentClue: nextClue,
-        witnessLine: witnessText,
+        witnessLine,
         history: newHistory,
-        visitedRooms: visited,
       };
     }
 
-    function finish(state, history, visited, extraEntries) {
-      const newHistory = [...history, ...extraEntries];
-      const lastWitness = extraEntries[extraEntries.length - 1]?.text ?? state.witnessLine;
-      // Replay all narrative beats (intro, clues, witness lines) in order.
-      const clueReplay = newHistory.filter(
+    function finish(state, history, extraEntries) {
+      const newHistory = [...history, ...extraEntries.map(e => ({ type: 'witness', ...e }))];
+      const last = extraEntries[extraEntries.length - 1];
+      const replay = newHistory.filter(
         h => h.type === 'intro' || h.type === 'clue' || h.type === 'witness'
       );
       return {
         ...state,
         history: newHistory,
-        witnessLine: lastWitness,
-        visitedRooms: visited,
+        witnessLine: { fi: last.fi, en: last.en },
         status: 'won',
-        celebration: { replay: clueReplay },
+        celebration: { replay },
       };
     }
 
     // -------------------------------------------------------------------
-    // 7. Subcomponents
+    // Subcomponents
     // -------------------------------------------------------------------
     function TurnIndicator({ remaining, total }) {
       const dots = [];
@@ -335,7 +348,7 @@
       );
     }
 
-    function RoomTile({ roomKey, onClick, disabled, highlighted, dimmed }) {
+    function RoomTile({ roomKey, onClick, disabled, highlighted }) {
       const room = ROOMS[roomKey];
       const base =
         'flex flex-col items-center justify-center rounded-2xl border-2 p-4 h-32 transition-all select-none ';
@@ -344,9 +357,7 @@
         : 'cursor-pointer hover:border-amber-500 hover:bg-amber-50 hover:-translate-y-0.5 ';
       const tone = highlighted
         ? 'bg-amber-100 border-amber-500 '
-        : dimmed
-          ? 'bg-stone-50 border-stone-200 '
-          : 'bg-white border-stone-300 ';
+        : 'bg-white border-stone-300 ';
       return (
         <button
           type="button"
@@ -356,11 +367,12 @@
         >
           <span className="text-4xl mb-1" aria-hidden="true">{room.emoji}</span>
           <span className="text-sm font-medium text-stone-700">{room.name}</span>
+          <span className="text-xs text-stone-400">{room.en}</span>
         </button>
       );
     }
 
-    function ApartmentGrid({ onRoomClick, disabled, highlightRoom, foundRoom }) {
+    function ApartmentGrid({ onRoomClick, disabled, foundRoom }) {
       return (
         <div className="grid grid-cols-3 gap-3">
           {GRID_ORDER.map(key => (
@@ -370,7 +382,6 @@
               onClick={onRoomClick}
               disabled={disabled}
               highlighted={key === foundRoom}
-              dimmed={highlightRoom && key !== highlightRoom}
             />
           ))}
         </div>
@@ -378,7 +389,6 @@
     }
 
     function WitnessPanel({ line }) {
-      // The witness "speaks" the most recent Finnish utterance. No glosses.
       return (
         <div className="bg-white rounded-2xl border-2 border-stone-300 p-4 shadow-sm">
           <div className="flex items-start gap-3">
@@ -388,7 +398,10 @@
                 Rouva Virtanen
               </div>
               <p className="text-lg font-medium text-stone-900 leading-snug">
-                "{line}"
+                "{line.fi}"
+              </p>
+              <p className="text-sm text-stone-500 italic mt-1 leading-snug">
+                {line.en}
               </p>
             </div>
           </div>
@@ -399,16 +412,16 @@
     function HistoryLog({ entries }) {
       return (
         <div className="bg-stone-50 rounded-2xl border border-stone-200 p-3 max-h-72 overflow-y-auto">
-          <div className="text-xs uppercase tracking-wider text-stone-500 mb-2">Tapahtumat</div>
-          <ul className="space-y-1.5 text-sm">
+          <div className="text-xs uppercase tracking-wider text-stone-500 mb-2">Tapahtumat · Log</div>
+          <ul className="space-y-2 text-sm">
             {entries.map((e, i) => {
-              const tone =
-                e.type === 'click'   ? 'text-stone-600 italic' :
-                e.type === 'clue'    ? 'text-stone-900' :
-                e.type === 'witness' ? 'text-stone-900' :
-                                       'text-stone-500';
+              const fiTone =
+                e.type === 'click' ? 'text-stone-600 italic' : 'text-stone-900';
               return (
-                <li key={i} className={tone}>{e.text}</li>
+                <li key={i}>
+                  <div className={fiTone}>{e.fi}</div>
+                  <div className="text-xs text-stone-400 italic">{e.en}</div>
+                </li>
               );
             })}
           </ul>
@@ -425,15 +438,18 @@
             <div className="text-center mb-4">
               <div className="text-5xl mb-2">🐈</div>
               <h2 className="text-2xl font-bold text-stone-900">Löysit Misun!</h2>
-              <p className="text-sm text-stone-500 mt-1">{level.title} valmis</p>
+              <p className="text-sm text-stone-500">You found Misu! · {level.title} valmis</p>
             </div>
             <div className="bg-stone-50 rounded-xl p-3 mb-4 max-h-60 overflow-y-auto">
               <div className="text-xs uppercase tracking-wider text-stone-500 mb-2">
-                Tarinan kulku
+                Tarinan kulku · The story
               </div>
-              <ul className="space-y-1.5 text-sm text-stone-800">
+              <ul className="space-y-2 text-sm text-stone-800">
                 {state.celebration.replay.map((e, i) => (
-                  <li key={i}>{e.text}</li>
+                  <li key={i}>
+                    <div>{e.fi}</div>
+                    <div className="text-xs text-stone-500 italic">{e.en}</div>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -465,14 +481,15 @@
       );
     }
 
-    function FailureOverlay({ state, dispatch }) {
+    function FailureOverlay({ dispatch }) {
       return (
         <div className="absolute inset-0 bg-stone-900/70 flex items-center justify-center rounded-3xl p-6 z-10">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl text-center">
             <div className="text-5xl mb-2">🌧️</div>
             <h2 className="text-2xl font-bold text-stone-900 mb-1">Misu karkasi…</h2>
             <p className="text-stone-600 mb-4">
-              Vuorot loppuivat. Yritetäänkö uudelleen?
+              Vuorot loppuivat. Yritetäänkö uudelleen?<br />
+              <span className="text-sm text-stone-500 italic">Out of turns. Try again?</span>
             </p>
             <div className="flex gap-2 justify-center">
               <button
@@ -500,7 +517,8 @@
             <div className="text-5xl mb-2">🏆</div>
             <h2 className="text-2xl font-bold text-stone-900 mb-1">Kaikki tasot valmiit!</h2>
             <p className="text-stone-600 mb-4">
-              Hienoa työtä, etsivä. Misu on aina löytynyt.
+              Hienoa työtä, etsivä.<br />
+              <span className="text-sm text-stone-500 italic">All levels complete. Nice work, detective.</span>
             </p>
             <button
               onClick={() => dispatch({ type: 'restart_campaign' })}
@@ -514,7 +532,7 @@
     }
 
     // -------------------------------------------------------------------
-    // 8. Main game component
+    // Main
     // -------------------------------------------------------------------
     function LostCatGame() {
       const [state, dispatch] = useReducer(reducer, 0, initialStateForLevel);
@@ -524,7 +542,7 @@
 
       const overlay =
         state.status === 'won'                ? <VictoryOverlay state={state} dispatch={dispatch} /> :
-        state.status === 'lost'               ? <FailureOverlay state={state} dispatch={dispatch} /> :
+        state.status === 'lost'               ? <FailureOverlay dispatch={dispatch} /> :
         state.status === 'campaign_complete'  ? <CampaignCompleteOverlay dispatch={dispatch} /> :
                                                 null;
 
@@ -533,10 +551,10 @@
           <header className="flex items-end justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-stone-900">Kadonnut kissa</h1>
-              <p className="text-sm text-stone-500">{level.title} · Etsi Misu</p>
+              <p className="text-sm text-stone-500">The Lost Cat · {level.title}</p>
             </div>
             <div className="flex flex-col items-end">
-              <span className="text-xs uppercase tracking-wider text-stone-500 mb-1">Vuorot</span>
+              <span className="text-xs uppercase tracking-wider text-stone-500 mb-1">Vuorot · Turns</span>
               <TurnIndicator remaining={state.turnsRemaining} total={level.turnBudget} />
             </div>
           </header>
@@ -559,7 +577,7 @@
           </div>
 
           <footer className="mt-4 flex items-center justify-between text-xs text-stone-500">
-            <span>Klikkaa huonetta toimiaksesi vihjeen mukaan.</span>
+            <span>Klikkaa huonetta toimiaksesi vihjeen mukaan. · Click a room to act on the clue.</span>
             <button
               onClick={() => dispatch({ type: 'restart_level' })}
               className="text-stone-600 hover:text-stone-900 underline"
